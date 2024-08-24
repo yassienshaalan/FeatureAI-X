@@ -21,14 +21,14 @@ from datetime import datetime
 class Logger(object):
     def __init__(self, log_filename):
         self.terminal = sys.stdout
-        self.log = open(log_filename, "a")
+        self.log = open(log_filename, "a", encoding="utf-8")  
 
     def write(self, message):
         self.terminal.write(message)
         self.log.write(message)
 
     def flush(self):
-        pass  # Needed for Python 3 compatibility
+        pass  
 
 def create_directories():
     if not os.path.exists('logs'):
@@ -68,17 +68,14 @@ def setup_logging():
     sys.stdout = Logger(log_filename)
 
 
-def save_metrics(metrics, set_name):
-    create_directories()
+def save_metrics(self, metrics, set_name):
+    # Save the metrics to a file
     metrics_filename = os.path.join('results', f'validated_metrics_{set_name}.txt')
-    
-    with open(metrics_filename, 'w') as file:
+    with open(metrics_filename, 'w', encoding="utf-8") as file:
         for key, value in metrics.items():
             file.write(f"{key}: {value}\n")
-    
-    logging.info(f"Metrics for '{set_name}' saved to {metrics_filename}")
 
-
+    print(f"Metrics saved to {metrics_filename}")
 
 class DataDriftDetector:
     def calculate_drift(self, baseline_df, current_df):
@@ -163,60 +160,88 @@ class FeatureSetValidator:
     def __init__(self):
         self.drift_detector = DataDriftDetector()
         self.rule_generator = ValidationRuleGenerator()
+        self.api_key = os.getenv('GOOGLE_API_KEY')  # If using Google Colab 
+        genai.configure(api_key=self.api_key)
+        self.model = genai.GenerativeModel('gemini-pro')
        
 
     def generate_code_snippets(self, issues, df_name='df'):
         code_snippets = []
 
+        # Initialize a dictionary to store the validation outcomes
         code_snippets.append("validation_outcomes = {}  # Dictionary to store outcomes\n")
 
+        # Iterate over the issues
         for issue in issues:
+            # Extract the column name from the issue (assuming the issue includes the column name)
+            column_name = self.extract_column_name(issue)
+
+            # Generate code to handle missing values
             if "missing values" in issue.lower():
                 snippet = f"""
-                # Check and handle missing values in {df_name}
-                missing_values = {df_name}.isnull().sum().sum()
-                if missing_values > 0:
-                    validation_outcomes['missing_values'] = f"Missing values detected: {{missing_values}}"
-                    {df_name}.fillna({df_name}.median(), inplace=True)
-                    validation_outcomes['missing_values_filled'] = "Missing values filled with median."
-                else:
-                    validation_outcomes['missing_values'] = "No missing values detected."
-                """
+    # Check and handle missing values in '{column_name}' column
+    if '{column_name}' in {df_name}.columns:
+        missing_values = {df_name}['{column_name}'].isnull().sum()
+        if missing_values > 0:
+            validation_outcomes['{column_name}_missing_values'] = f"Missing values detected: {{missing_values}} in '{column_name}'"
+            {df_name}['{column_name}'].fillna({df_name}['{column_name}'].median(), inplace=True)
+            validation_outcomes['{column_name}_missing_values_filled'] = "Missing values in '{column_name}' filled with median."
+        else:
+            validation_outcomes['{column_name}_missing_values'] = "No missing values detected in '{column_name}'."
+    else:
+        validation_outcomes['{column_name}_missing_values'] = "'{column_name}' column not found."
+    """
                 code_snippets.append(snippet)
 
+            # Generate code to handle drift detection
             if "drift" in issue.lower():
                 snippet = f"""
-                # Check for drift in feature distributions
-                baseline_stats = {df_name}.describe()
-                current_stats = baseline_df.describe()
-                drift_detected = False
-                for column in baseline_stats.columns:
-                    if not baseline_stats[column].equals(current_stats[column]):
-                        validation_outcomes['drift'] = f"Drift detected in {{column}}"
-                        drift_detected = True
-                if not drift_detected:
-                    validation_outcomes['drift'] = "No drift detected."
-                """
+    # Check for drift in '{column_name}' column distributions
+    if '{column_name}' in {df_name}.columns:
+        baseline_stats = baseline_df['{column_name}'].describe()
+        current_stats = {df_name}['{column_name}'].describe()
+        drift_detected = False
+        for stat in baseline_stats.index:
+            if not baseline_stats[stat] == current_stats[stat]:
+                validation_outcomes['{column_name}_drift'] = f"Drift detected in '{column_name}': {{stat}}"
+                drift_detected = True
+        if not drift_detected:
+            validation_outcomes['{column_name}_drift'] = "No drift detected in '{column_name}'."
+    else:
+        validation_outcomes['{column_name}_drift'] = "'{column_name}' column not found."
+    """
                 code_snippets.append(snippet)
 
-        return '\n'.join(code_snippets)
+            # Add more cases as needed for other types of issues
+            # Example: Handling categorical consistency, text analysis, etc.
 
-    def save_and_execute_code_snippets(self, code_snippets, set_name):
-        # Save the code snippets to a file
-        code_snippet_filename = os.path.join('results', f'code_snippets_{set_name}.py')
-        with open(code_snippet_filename, 'w') as file:
-            file.write(code_snippets)
+        # Join all code snippets into a single string and return
+        return ''.join(code_snippets)
 
-        print(f"Generated code snippets saved to {code_snippet_filename}")
+    def extract_column_name(self, issue):
+        """
+        Extract the column name from the issue description.
+        This is a placeholder function. You need to implement the logic based on how the column names are mentioned in the issue.
+        """
+        # Example logic assuming column names are mentioned in quotes within the issue string
+        import re
+        match = re.search(r"'([^']*)'", issue)
+        if match:
+            return match.group(1)
+        return "unknown_column"  # Fallback in case the column name can't be extracted
 
-        # Execute the saved code snippets
-        local_vars = {}
-        exec(code_snippets, {}, local_vars)  # Execute the code snippets and capture local variables
+    def generate_code_snippets_with_genai(self, rules):
+        # Generate a prompt that asks the AI to create Python code based on the rules
+        #prompt = f"Generate Python code to validate the following data based on these rules:\n{rules}\n"
+        prompt = f"""
+        Based on the following data validation rules, generate Python code to implement these rules for a pandas DataFrame named 'feature_set':
 
-        validation_outcomes = local_vars.get('validation_outcomes', {})
-        print(f"Validation outcomes for '{set_name}': {validation_outcomes}")
+        {rules}
 
-        return validation_outcomes
+        The code should perform the necessary checks and save the validation outcomes, including all relevant metrics, to a CSV file named 'validation_results_{set_name}.csv'.
+        """
+        code_snippets = self.model.generate_content(prompt).text
+        return code_snippets
 
     def save_metrics(self, metrics, set_name):
         # Save the metrics to a file
@@ -230,7 +255,7 @@ class FeatureSetValidator:
     def save_generated_rules(self, rules, set_name):
         # Save the generated rules to a file
         rules_filename = os.path.join('results', f'generated_rules_{set_name}.txt')
-        with open(rules_filename, 'w') as file:
+        with open(rules_filename, 'w', encoding="utf-8") as file:
             file.write(rules)
 
         print(f"Generated rules saved to {rules_filename}")
@@ -243,17 +268,70 @@ class FeatureSetValidator:
         # Implement your dynamic custom rules logic
         return []
 
+    def define_metadata(self, df):
+        metadata = {
+            "columns": df.columns.tolist(),
+            "num_rows": df.shape[0],
+            "num_columns": df.shape[1],
+            "missing_values": df.isnull().sum().sum(),
+            "unique_counts": df.nunique(),
+            "data_types": df.dtypes.to_dict()  # Include the data types
+        }
+        return metadata
+
+    def save_and_execute_code_snippets(self, code_snippets, set_name, feature_set):
+
+        # Strip out the markdown code block markers
+        if code_snippets.startswith("```python"):
+            code_snippets = code_snippets[len("```python"):].strip()
+        if code_snippets.endswith("```"):
+            code_snippets = code_snippets[:-len("```")].strip()
+
+         # Define the dataset file name
+        dataset_filename = f'data_{set_name}.csv'
+        
+        # Save the dataset to a CSV file
+        feature_set.to_csv(dataset_filename, index=False)
+        print(f"Dataset for '{set_name}' saved as {dataset_filename}")
+        
+            # Replace the dataset reference in code snippets (if necessary)
+        code_snippets = code_snippets.replace('feature_set.csv', f'{dataset_filename}')
+
+        # Save the code snippets to a file
+        code_snippet_filename = os.path.join('results', f'code_snippets_{set_name}.py')
+        with open(code_snippet_filename, 'w', encoding="utf-8") as file:
+            file.write(code_snippets)
+
+        print(f"Generated code snippets saved to {code_snippet_filename}")
+
+        # Execute the saved code snippets
+        local_vars = {}
+        try:
+            exec(code_snippets, {}, local_vars)  # Execute the code snippets and capture local variables
+        except Exception as e:
+            print(f"Error executing code snippets: {e}")
+            return {}
+
+        validation_outcomes = local_vars.get('validation_outcomes', {})
+        print(f"Validation outcomes for '{set_name}': {validation_outcomes}")
+
+        return validation_outcomes
+
+
     def validate_feature_set(self, set_name, feature_set, baseline_df):
         print(f"Validating feature set '{set_name}'...")
+
+        # Define metadata for the feature set
+        metadata = self.define_metadata(feature_set)  # Correctly define the metadata
 
         stats = self.analyze_feature_set(feature_set)
         drift_issues = self.drift_detector.calculate_drift(baseline_df, feature_set)
 
         # Generate validation rules using Generative AI
-        rules = self.rule_generator.generate_validation_rules_with_genai(metadata=feature_set, stats=stats)
+        rules = self.rule_generator.generate_validation_rules_with_genai(metadata=metadata, stats=stats)
         print(f"Generated Validation Rules for {set_name}:\n", rules)
 
-        # Apply dynamic custom rules and check for issues
+        # Apply dynamic custom rules and check for issues (nanual if needed)
         issues = self.dynamic_custom_rules(feature_set)
         issues.extend(drift_issues)
 
@@ -264,10 +342,10 @@ class FeatureSetValidator:
             self.write_feature_quality_to_table(set_name, issues)
 
             # Generate code snippets to address the issues
-            code_snippets = self.generate_code_snippets(issues, df_name='feature_set')
-
+            #code_snippets = self.generate_code_snippets(issues, df_name='feature_set')
+            code_snippets = self.generate_code_snippets_with_genai(rules)
             # Save and execute the generated code snippets
-            validation_outcomes = self.save_and_execute_code_snippets(code_snippets, set_name)
+            validation_outcomes = self.save_and_execute_code_snippets(code_snippets, set_name, feature_set)
 
             # Merge validation outcomes into metrics
             metrics = {
@@ -396,10 +474,14 @@ class GenAISyntheticFeatureGenerator:
         # Manually parse the synthetic data
         try:
             # Convert the synthetic data (table-like string) to a list of lines
-            lines = synthetic_data.strip().split('\n')
+            lines = d.strip().split('\n')
 
             # Extract the headers from the first line
             headers = [header.strip() for header in lines[0].split('|') if header.strip()]
+
+            # Debugging: Print the headers and first few lines
+            print("Headers extracted:", headers)
+            print("First few lines of the data:", lines[:5])
 
             # Extract the data rows
             rows = []
@@ -411,8 +493,20 @@ class GenAISyntheticFeatureGenerator:
             synthetic_df = pd.DataFrame(rows, columns=headers)
 
             # Convert numeric columns back to their proper data types
-            for column in ['age', 'months_as_customer', 'policy_annual_premium']:
-                synthetic_df[column] = pd.to_numeric(synthetic_df[column], errors='coerce')
+            #for column in ['age', 'months_as_customer', 'policy_annual_premium']:
+            #    synthetic_df[column] = pd.to_numeric(synthetic_df[column], errors='coerce')
+            # Detect and convert numeric columns back to their proper data types
+            '''
+            for column in synthetic_df.columns:
+                try:
+                    # Attempt to convert the column to numeric
+                    synthetic_df[column] = pd.to_numeric(synthetic_df[column], errors='coerce')
+                    # Check if the conversion was successful by counting non-NaN entries
+                    if synthetic_df[column].notna().sum() > 0:
+                        print(f"Converted column '{column}' to numeric.")
+                except Exception as convert_error:
+                    print(f"Could not convert column '{column}' to numeric: {convert_error}")
+            '''
 
         except Exception as e:
             print(f"Error parsing the synthetic data: {e}")
@@ -589,7 +683,7 @@ if __name__ == "__main__":
             "num_columns": feature_set.shape[1],
             "missing_values": feature_set.isnull().sum().sum(),
             "unique_counts": feature_set.nunique(),
-            "data_types": feature_set.dtypes.to_dict(),
+            "data_types": feature_set.dtypes,
             "original_df": feature_set  # Keep a reference to the original DataFrame
         }
         print("  Metadata defined.")
@@ -619,8 +713,7 @@ if __name__ == "__main__":
         # Step 5: Output or Save Results
         print(f"Synthetic Data for {set_name}:")
         print(synthetic_data.head())
-        # Optionally, save the synthetic data or validation results if needed
-        synthetic_data.to_csv(f'synthetic_data_{set_name}.csv', index=False)
+    
 
     print("Processing of all feature sets completed.")
 
