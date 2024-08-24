@@ -1,0 +1,108 @@
+2024-08-24 12:21:33,475 - INFO - Logging setup complete.
+2024-08-24 12:21:33,477 - INFO - This is an info message that will also be logged.
+This will be printed to the console and logged to the file.
+Loading baseline and new feature sets...
+Loading baseline df
+Read 1000 records
+Columns after loading: ['months_as_customer', 'age', 'policy_number', 'policy_bind_date', 'policy_state', 'policy_csl', 'policy_deductable', 'policy_annual_premium', 'umbrella_limit', 'insured_zip', 'insured_sex', 'insured_education_level', 'insured_occupation', 'insured_hobbies', 'insured_relationship', 'capital-gains', 'capital-loss', 'incident_date', 'incident_type', 'collision_type', 'incident_severity', 'authorities_contacted', 'incident_state', 'incident_city', 'incident_location', 'incident_hour_of_the_day', 'number_of_vehicles_involved', 'property_damage', 'bodily_injuries', 'witnesses', 'police_report_available', 'total_claim_amount', 'injury_claim', 'property_claim', 'vehicle_claim', 'auto_make', 'auto_model', 'auto_year', 'fraud_reported']
+Loading new df
+Read 1000 records
+Columns after loading: ['months_as_customer', 'age', 'policy_number', 'policy_bind_date', 'policy_state', 'policy_csl', 'policy_deductable', 'policy_annual_premium', 'umbrella_limit', 'insured_zip', 'insured_sex', 'insured_education_level', 'insured_occupation', 'insured_hobbies', 'insured_relationship', 'capital-gains', 'capital-loss', 'incident_date', 'incident_type', 'collision_type', 'incident_severity', 'authorities_contacted', 'incident_state', 'incident_city', 'incident_location', 'incident_hour_of_the_day', 'number_of_vehicles_involved', 'property_damage', 'bodily_injuries', 'witnesses', 'police_report_available', 'total_claim_amount', 'injury_claim', 'property_claim', 'vehicle_claim', 'auto_make', 'auto_model', 'auto_year', 'fraud_reported']
+Feature sets loaded successfully.
+Available columns in feature_df: ['months_as_customer', 'age', 'policy_number', 'policy_bind_date', 'policy_state', 'policy_csl', 'policy_deductable', 'policy_annual_premium', 'umbrella_limit', 'insured_zip', 'insured_sex', 'insured_education_level', 'insured_occupation', 'insured_hobbies', 'insured_relationship', 'capital-gains', 'capital-loss', 'incident_date', 'incident_type', 'collision_type', 'incident_severity', 'authorities_contacted', 'incident_state', 'incident_city', 'incident_location', 'incident_hour_of_the_day', 'number_of_vehicles_involved', 'property_damage', 'bodily_injuries', 'witnesses', 'police_report_available', 'total_claim_amount', 'injury_claim', 'property_claim', 'vehicle_claim', 'auto_make', 'auto_model', 'auto_year', 'fraud_reported']
+Specify the date format explicitly
+Adding simulated text feature...
+Simulated text feature added.
+Handling missing values and encoding categorical features...
+Fill numeric columns
+Fill categorical columns
+Feature sets created successfully.
+feature_sets {'set1':      age  months_as_customer  policy_annual_premium                            comments
+0     48                 328                1406.91           This is a sample comment.
+1     42                 228                1197.22       Another example of text data.
+2     18                 134                1413.14                                    
+3     41                 256                1415.74  Validating text fields with GPT-4.
+4     44                 228                1583.91         Check language consistency.
+..   ...                 ...                    ...                                 ...
+995   38                   3                1310.80           This is a sample comment.
+996   41                 285                1436.79       Another example of text data.
+997   34                 130                1383.49                                    
+998   62                 458                1356.92  Validating text fields with GPT-4.
+999   60                 456                 766.19         Check language consistency.
+
+[1000 rows x 4 columns], 'set2':      total_claim_amount  incident_severity  age                            comments
+0                 71610                  0   48           This is a sample comment.
+1                  5070                  1   42       Another example of text data.
+2                 34650                  1   18                                    
+3                 63400                  0   41  Validating text fields with GPT-4.
+4                  6500                  1   44         Check language consistency.
+..                  ...                ...  ...                                 ...
+995               87200                  1   38           This is a sample comment.
+996              108480                  0   41       Another example of text data.
+997               67500                  1   34                                    
+998               46980                  0   62  Validating text fields with GPT-4.
+999                5060                  1   60         Check language consistency.
+
+[1000 rows x 4 columns], 'set3':      vehicle_claim  property_damage  incident_hour_of_the_day                            comments
+0            52080                2                         5           This is a sample comment.
+1             3510                0                         8       Another example of text data.
+2            23100                1                         7                                    
+3            50720                0                         5  Validating text fields with GPT-4.
+4             4550                1                        20         Check language consistency.
+..             ...              ...                       ...                                 ...
+995          61040                2                        20           This is a sample comment.
+996          72320                2                        23       Another example of text data.
+997          52500                0                         4                                    
+998          36540                0                         2  Validating text fields with GPT-4.
+999           3680                0                         6         Check language consistency.
+
+[1000 rows x 4 columns]}
+feature_sets out {'set1':      age  months_as_customer  policy_annual_premium                            comments
+0     48                 328                1406.91           This is a sample comment.
+1     42                 228                1197.22       Another example of text data.
+2     18                 134                1413.14                                    
+3     41                 256                1415.74  Validating text fields with GPT-4.
+4     44                 228                1583.91         Check language consistency.
+..   ...                 ...                    ...                                 ...
+995   38                   3                1310.80           This is a sample comment.
+996   41                 285                1436.79       Another example of text data.
+997   34                 130                1383.49                                    
+998   62                 458                1356.92  Validating text fields with GPT-4.
+999   60                 456                 766.19         Check language consistency.
+
+[1000 rows x 4 columns], 'set2':      total_claim_amount  incident_severity  age                            comments
+0                 71610                  0   48           This is a sample comment.
+1                  5070                  1   42       Another example of text data.
+2                 34650                  1   18                                    
+3                 63400                  0   41  Validating text fields with GPT-4.
+4                  6500                  1   44         Check language consistency.
+..                  ...                ...  ...                                 ...
+995               87200                  1   38           This is a sample comment.
+996              108480                  0   41       Another example of text data.
+997               67500                  1   34                                    
+998               46980                  0   62  Validating text fields with GPT-4.
+999                5060                  1   60         Check language consistency.
+
+[1000 rows x 4 columns], 'set3':      vehicle_claim  property_damage  incident_hour_of_the_day                            comments
+0            52080                2                         5           This is a sample comment.
+1             3510                0                         8       Another example of text data.
+2            23100                1                         7                                    
+3            50720                0                         5  Validating text fields with GPT-4.
+4             4550                1                        20         Check language consistency.
+..             ...              ...                       ...                                 ...
+995          61040                2                        20           This is a sample comment.
+996          72320                2                        23       Another example of text data.
+997          52500                0                         4                                    
+998          36540                0                         2  Validating text fields with GPT-4.
+999           3680                0                         6         Check language consistency.
+
+[1000 rows x 4 columns]}
+
+Processing feature set 'set1'...
+  Defining metadata...
+  Metadata defined.
+  Generating statistics...
+  Statistics generated.
+  Validating feature set...
+Validating feature set 'set1'...
+Generating validation rules with gemini

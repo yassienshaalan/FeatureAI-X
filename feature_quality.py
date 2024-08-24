@@ -5,7 +5,7 @@ from scipy.stats import ks_2samp
 from langdetect import detect
 from langchain import LLMChain, PromptTemplate
 from langchain_community.llms import OpenAI
-
+import sys
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import torch
 import numpy as np
@@ -14,6 +14,71 @@ from sklearn.utils import shuffle
 from keras.models import Sequential
 from keras.layers import Dense, LeakyReLU
 from keras.optimizers import Adam
+import google.generativeai as genai
+import logging
+from datetime import datetime
+
+class Logger(object):
+    def __init__(self, log_filename):
+        self.terminal = sys.stdout
+        self.log = open(log_filename, "a")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        pass  # Needed for Python 3 compatibility
+
+def create_directories():
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+    if not os.path.exists('results'):
+        os.makedirs('results')
+
+def generate_filename(base_dir, prefix):
+    now = datetime.now()
+    date_str = now.strftime("%Y-%m-%d_%H-%M-%S")
+    
+    # Determine the run number based on existing files
+    run_number = len([f for f in os.listdir(base_dir) if f.startswith(prefix + date_str)]) + 1
+    filename = f"{prefix}_{date_str}_run{run_number}.log"
+    
+    return os.path.join(base_dir, filename)
+
+def setup_logging():
+
+    create_directories()
+    # Generate the log filename with time and run number
+    now = datetime.now()
+    date_str = now.strftime("%Y-%m-%d_%H-%M-%S")
+    log_filename = os.path.join('logs', f'log_{date_str}.log')
+
+    # Set up logging to both console and file
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_filename),
+            logging.StreamHandler()  # This logs to console
+        ]
+    )
+    logging.info("Logging setup complete.")
+    # Redirect print statements to log file as well
+    sys.stdout = Logger(log_filename)
+
+
+def save_metrics(metrics, set_name):
+    create_directories()
+    metrics_filename = os.path.join('results', f'validated_metrics_{set_name}.txt')
+    
+    with open(metrics_filename, 'w') as file:
+        for key, value in metrics.items():
+            file.write(f"{key}: {value}\n")
+    
+    logging.info(f"Metrics for '{set_name}' saved to {metrics_filename}")
+
+
 
 class DataDriftDetector:
     def calculate_drift(self, baseline_df, current_df):
@@ -37,6 +102,11 @@ class DataDriftDetector:
         return drift_issues
 
 class ValidationRuleGenerator:
+    def __init__(self):
+        self.api_key = os.getenv('GOOGLE_API_KEY')  # If using Google Colab 
+        genai.configure(api_key=self.api_key)
+        self.model = genai.GenerativeModel('gemini-pro')
+     
     def generate_prompt_from_metadata(self, metadata, stats):
         prompt = "Generate a set of comprehensive data validation rules based on the following dataset statistics:\n"
         for column in stats.index:
@@ -61,63 +131,201 @@ class ValidationRuleGenerator:
         template = PromptTemplate(
             input_variables=["metadata", "stats"],
             template=self.generate_prompt_from_metadata(metadata, stats)
-            print("template prompt for feature validation")
-            print(template)
         )
+        print("template prompt for feature validation")
+        print(template)
+        
         llm = OpenAI(openai_api_key='your-api-key-here')
         chain = LLMChain(prompt_template=template, llm=llm)
         rules = chain.run({"metadata": metadata, "stats": stats})
+        return rules
+    
+    def generate_response(self, text: str):
+        # Use Gemini to generate a text response
+        print("Fetching response, please wait......")
+        response = self.model.generate_content(text)
+        if response and response.text:
+            return response.text
+        else:
+            logging.warning("Gemini response was empty or blocked. Check safety ratings.")
+            return None
+
+    def generate_validation_rules_with_genai(self, metadata, stats):
+        print("Generating validation rules with gemini")
+        prompt = self.generate_prompt_from_metadata(metadata, stats)
+        print("Generated prompt for feature validation:")
+        print(prompt)
+        # Using the Generative AI model to generate rules
+        rules = self.generate_response(text=prompt)
         return rules
 
 class FeatureSetValidator:
     def __init__(self):
         self.drift_detector = DataDriftDetector()
         self.rule_generator = ValidationRuleGenerator()
+       
 
-    def validate_feature_set(self, feature_set_name, df, baseline_df):
-        metadata = {
-            "columns": df.columns.tolist(),
-            "num_rows": df.shape[0],
-            "num_columns": df.shape[1],
-            "missing_values": df.isnull().sum().sum(),
-            "unique_counts": df.nunique(),
-            "data_types": df.dtypes
-        }
-        stats = self.analyze_feature_set(df)
-        drift_issues = self.drift_detector.calculate_drift(baseline_df, df)
-        rules = self.rule_generator.generate_validation_rules_with_langchain(metadata, stats)
-        print(f"Generated Validation Rules for {feature_set_name}:\n", rules)
-        issues = self.dynamic_custom_rules(df)
+    def generate_code_snippets(self, issues, df_name='df'):
+        code_snippets = []
+
+        code_snippets.append("validation_outcomes = {}  # Dictionary to store outcomes\n")
+
+        for issue in issues:
+            if "missing values" in issue.lower():
+                snippet = f"""
+                # Check and handle missing values in {df_name}
+                missing_values = {df_name}.isnull().sum().sum()
+                if missing_values > 0:
+                    validation_outcomes['missing_values'] = f"Missing values detected: {{missing_values}}"
+                    {df_name}.fillna({df_name}.median(), inplace=True)
+                    validation_outcomes['missing_values_filled'] = "Missing values filled with median."
+                else:
+                    validation_outcomes['missing_values'] = "No missing values detected."
+                """
+                code_snippets.append(snippet)
+
+            if "drift" in issue.lower():
+                snippet = f"""
+                # Check for drift in feature distributions
+                baseline_stats = {df_name}.describe()
+                current_stats = baseline_df.describe()
+                drift_detected = False
+                for column in baseline_stats.columns:
+                    if not baseline_stats[column].equals(current_stats[column]):
+                        validation_outcomes['drift'] = f"Drift detected in {{column}}"
+                        drift_detected = True
+                if not drift_detected:
+                    validation_outcomes['drift'] = "No drift detected."
+                """
+                code_snippets.append(snippet)
+
+        return '\n'.join(code_snippets)
+
+    def save_and_execute_code_snippets(self, code_snippets, set_name):
+        # Save the code snippets to a file
+        code_snippet_filename = os.path.join('results', f'code_snippets_{set_name}.py')
+        with open(code_snippet_filename, 'w') as file:
+            file.write(code_snippets)
+
+        print(f"Generated code snippets saved to {code_snippet_filename}")
+
+        # Execute the saved code snippets
+        local_vars = {}
+        exec(code_snippets, {}, local_vars)  # Execute the code snippets and capture local variables
+
+        validation_outcomes = local_vars.get('validation_outcomes', {})
+        print(f"Validation outcomes for '{set_name}': {validation_outcomes}")
+
+        return validation_outcomes
+
+    def save_metrics(self, metrics, set_name):
+        # Save the metrics to a file
+        metrics_filename = os.path.join('results', f'validated_metrics_{set_name}.txt')
+        with open(metrics_filename, 'w') as file:
+            for key, value in metrics.items():
+                file.write(f"{key}: {value}\n")
+
+        print(f"Metrics saved to {metrics_filename}")
+
+    def save_generated_rules(self, rules, set_name):
+        # Save the generated rules to a file
+        rules_filename = os.path.join('results', f'generated_rules_{set_name}.txt')
+        with open(rules_filename, 'w') as file:
+            file.write(rules)
+
+        print(f"Generated rules saved to {rules_filename}")
+
+    def write_feature_quality_to_table(self, feature_set_name, issues):
+        # Implement how to write feature quality issues to a table or file
+        print(f"Writing feature quality issues for '{feature_set_name}'...")
+
+    def dynamic_custom_rules(self, df):
+        # Implement your dynamic custom rules logic
+        return []
+
+    def validate_feature_set(self, set_name, feature_set, baseline_df):
+        print(f"Validating feature set '{set_name}'...")
+
+        stats = self.analyze_feature_set(feature_set)
+        drift_issues = self.drift_detector.calculate_drift(baseline_df, feature_set)
+
+        # Generate validation rules using Generative AI
+        rules = self.rule_generator.generate_validation_rules_with_genai(metadata=feature_set, stats=stats)
+        print(f"Generated Validation Rules for {set_name}:\n", rules)
+
+        # Apply dynamic custom rules and check for issues
+        issues = self.dynamic_custom_rules(feature_set)
         issues.extend(drift_issues)
+
         if issues:
-            print(f"Data Quality Issues Found in {feature_set_name}:")
+            print(f"Data Quality Issues Found in {set_name}:")
             for issue in issues:
                 print(f"- {issue}")
-            self.write_feature_quality_to_table(feature_set_name, issues)
+            self.write_feature_quality_to_table(set_name, issues)
+
+            # Generate code snippets to address the issues
+            code_snippets = self.generate_code_snippets(issues, df_name='feature_set')
+
+            # Save and execute the generated code snippets
+            validation_outcomes = self.save_and_execute_code_snippets(code_snippets, set_name)
+
+            # Merge validation outcomes into metrics
+            metrics = {
+                'total_features': len(feature_set.columns),
+                'missing_values': feature_set.isnull().sum().sum(),
+                'drift_detected': bool(drift_issues),
+                'validation_outcomes': validation_outcomes  # Add validation outcomes to metrics
+            }
         else:
-            print(f"No data quality issues found in {feature_set_name}.")
-            self.write_feature_quality_to_table(feature_set_name, ["No issues found"])
+            print(f"No data quality issues found in {set_name}.")
+            self.write_feature_quality_to_table(set_name, ["No issues found"])
+
+            metrics = {
+                'total_features': len(feature_set.columns),
+                'missing_values': feature_set.isnull().sum().sum(),
+                'drift_detected': bool(drift_issues),
+                'validation_outcomes': "No issues found"
+            }
+
+        # Save the validated metrics
+        self.save_metrics(metrics, set_name=set_name)
+
+        # Save the generated rules
+        self.save_generated_rules(rules, set_name=set_name)
+
+        print(f"Validation for '{set_name}' completed.")
 
     def analyze_feature_set(self, df):
         return df.describe(include='all').T
 
     def dynamic_custom_rules(self, df):
         custom_issues = []
+
+        # Example dynamic custom rule: Check if 'age' exceeds a certain threshold based on context
         if 'age' in df.columns:
-            max_age_threshold = 100
+            max_age_threshold = 100  # Can be dynamically set based on external factors or data context
             if df['age'].max() > max_age_threshold:
                 custom_issues.append(f"'age' should not exceed {max_age_threshold}. Found {df['age'].max()}.")
-        if 'annual_premium' in df.columns:
-            if df['annual_premium'].max() > 50000:
-                custom_issues.append(f"'annual_premium' should not exceed 50000. Found {df['annual_premium'].max()}.")
+
+        # Another dynamic rule: 'annual_premium' should be within a realistic range
+        if 'policy_annual_premium' in df.columns:
+            if df['policy_annual_premium'].max() > 50000:
+                custom_issues.append(f"'policy_annual_premium' should not exceed 50000. Found {df['policy_annual_premium'].max()}.")
+
+        # Example dynamic custom rule for text validation: Ensure comments are non-empty, in English, and have positive sentiment
         if 'comments' in df.columns:
-            for idx, text in df['comments'].iteritems():
+            for idx, text in df['comments'].items():  # Use .items() instead of .iteritems()
                 if not text or len(text.strip()) == 0:
                     custom_issues.append(f"Row {idx} in 'comments' is empty.")
                 else:
                     detected_lang = detect(text)
                     if detected_lang != 'en':
                         custom_issues.append(f"Row {idx} in 'comments' is not in English (detected: {detected_lang}).")
+                    # Example sentiment analysis (placeholder for actual implementation)
+                    sentiment = "positive"  # In practice, use a sentiment analysis model here
+                    if sentiment != "positive":
+                        custom_issues.append(f"Row {idx} in 'comments' has negative sentiment.")
+
         return custom_issues
 
     def write_feature_quality_to_table(self, feature_name, issues):
@@ -137,18 +345,19 @@ class FeatureStoreManager:
             file_path = os.path.join('data', 'insurance_claims_report_v2.csv')  
         df = pd.read_csv(file_path)
         print("Read",len(df),"records")
+        print("Columns after loading:", df.columns.tolist())  
         return df
 
     def load_baseline_feature_set(self):
         return self.load_new_feature_set(version='v1')  
 
-
-
-
 class GenAISyntheticFeatureGenerator:
     def __init__(self, stats, metadata, text_model_name='gpt2'):
         self.stats = stats
         self.metadata = metadata
+        self.api_key = os.getenv('GOOGLE_API_KEY')  # If using Google Colab 
+        genai.configure(api_key=self.api_key)
+        self.model = genai.GenerativeModel('gemini-pro')
         
         # Initialize the GPT-2 model and tokenizer for text generation
         self.tokenizer = GPT2Tokenizer.from_pretrained(text_model_name)
@@ -171,6 +380,45 @@ class GenAISyntheticFeatureGenerator:
                 synthetic_data[column] = [None] * num_rows  # Fallback for unsupported types
 
         return pd.DataFrame(synthetic_data)
+    
+    def generate_synthetic_data_with_genai(self, num_rows, stats):
+        # Example of generating a prompt for synthetic data
+        prompt = f"Generate {num_rows} synthetic rows based on the following statistics: {stats}"
+
+        # Using the Generative AI model to generate synthetic data
+        synthetic_response = self.model.generate_content(prompt)
+
+        print("synthetic_response")
+        print(synthetic_response.text)
+
+        synthetic_data = synthetic_response.text  # Get the actual text content
+
+        # Manually parse the synthetic data
+        try:
+            # Convert the synthetic data (table-like string) to a list of lines
+            lines = synthetic_data.strip().split('\n')
+
+            # Extract the headers from the first line
+            headers = [header.strip() for header in lines[0].split('|') if header.strip()]
+
+            # Extract the data rows
+            rows = []
+            for line in lines[2:]:  # Start from the third line to skip the header separator
+                row = [value.strip() for value in line.split('|') if value.strip()]
+                rows.append(row)
+
+            # Convert the list of rows into a DataFrame
+            synthetic_df = pd.DataFrame(rows, columns=headers)
+
+            # Convert numeric columns back to their proper data types
+            for column in ['age', 'months_as_customer', 'policy_annual_premium']:
+                synthetic_df[column] = pd.to_numeric(synthetic_df[column], errors='coerce')
+
+        except Exception as e:
+            print(f"Error parsing the synthetic data: {e}")
+            synthetic_df = pd.DataFrame()  # Return an empty DataFrame on error
+
+        return synthetic_df
 
     def generate_numeric_data_with_gan(self, column, num_rows):
         """
@@ -241,64 +489,139 @@ class GenAISyntheticFeatureGenerator:
         synthetic_dates = pd.to_datetime(np.random.randint(min_date.value, max_date.value, size=num_rows))
         return synthetic_dates.tolist()
 
-
-# Usage Example
-print("Loading baseline and new feature sets...")
-feature_store_manager = FeatureStoreManager()
-print("Loading baseline df")
-baseline_df = feature_store_manager.load_baseline_feature_set()
-print("Loading new df")
-feature_df = feature_store_manager.load_new_feature_set()
-print("Feature sets loaded successfully.")
+def save_synthetic_data(synthetic_data, set_name):
+    create_directories()
+    results_filename = os.path.join('results', f'synthetic_data_{set_name}.csv')
+    synthetic_data.to_csv(results_filename, index=False)
+    logging.info(f"Synthetic data for '{set_name}' saved to {results_filename}")
 
 
-print("Specify the date format explicitly")
-# Specify the correct date format for 'policy_bind_date' and 'incident_date'
-feature_df['policy_bind_date'] = pd.to_datetime(feature_df['policy_bind_date'], format='%d/%m/%y')
-feature_df['incident_date'] = pd.to_datetime(feature_df['incident_date'], format='%d/%m/%y')
+def save_generated_rules(rules, set_name):
+    create_directories()
+    rules_filename = os.path.join('results', f'generated_rules_{set_name}.txt')
+    
+    with open(rules_filename, 'w') as file:
+        file.write(rules)
+    
+    logging.info(f"Generated rules for '{set_name}' saved to {rules_filename}")
 
 
-# Adding simulated text feature
-print("Adding simulated text feature...")
-feature_df['comments'] = ([
-    "This is a sample comment.",
-    "Another example of text data.",
-    "",
-    "Validating text fields with GPT-4.",
-    "Check language consistency.",
-] * (len(feature_df) // 5 + 1))[:len(feature_df)]
+if __name__ == "__main__":
 
-print("Simulated text feature added.")
+    setup_logging()
 
-print("Handling missing values and encoding categorical features...")
-# Handling missing values
-# Fill numeric columns with the median value
-print("Fill numeric columns")
-numeric_columns = feature_df.select_dtypes(include=['number']).columns
-feature_df[numeric_columns] = feature_df[numeric_columns].fillna(feature_df[numeric_columns].median())
-print("Fill categorical columns")
-# Fill categorical columns with the mode (most frequent value)
-categorical_columns = feature_df.select_dtypes(include=['object']).columns
-for column in categorical_columns:
-    feature_df[column].fillna(feature_df[column].mode()[0], inplace=True)
+    print("This will be printed to the console and logged to the file.")
+    logging.info("This is an info message that will also be logged.")
 
-# Encoding categorical variables
-le = LabelEncoder()
-for column in feature_df.select_dtypes(include=['object']).columns:
-    if column not in ['comments']:  # Exclude non-categorical text features if present
-        feature_df[column] = le.fit_transform(feature_df[column])
+    # Usage Example
+    print("Loading baseline and new feature sets...")
+    feature_store_manager = FeatureStoreManager()
+    print("Loading baseline df")
+    baseline_df = feature_store_manager.load_baseline_feature_set()
+    print("Loading new df")
+    feature_df = feature_store_manager.load_new_feature_set()
+    print("Feature sets loaded successfully.")
 
-# Splitting the dataset into multiple feature sets (for simulation purposes)
-print("Splitting the dataset into multiple feature sets...")
-feature_sets = {
-    'set1': feature_df[['age', 'policy_tenure', 'annual_premium', 'comments']],
-    'set2': feature_df[['vehicle_age', 'policy_number', 'age', 'comments']],
-    'set3': feature_df[['annual_premium', 'policy_tenure', 'vehicle_age', 'comments']]
-}
-print("Feature sets created.")
+    print("Available columns in feature_df:", feature_df.columns.tolist())
 
-# Define metadata and stats for each feature set
-for set_name, feature_set in feature_sets.items():
-    print(f"\nProcessing feature set '{set_name}'...")
+    print("Specify the date format explicitly")
+    # Specify the correct date format for 'policy_bind_date' and 'incident_date'
+    feature_df['policy_bind_date'] = pd.to_datetime(feature_df['policy_bind_date'], format='%d/%m/%y')
+    feature_df['incident_date'] = pd.to_datetime(feature_df['incident_date'], format='%d/%m/%y')
 
-    # Define metadata
+
+    # Adding simulated text feature
+    print("Adding simulated text feature...")
+    feature_df['comments'] = ([
+        "This is a sample comment.",
+        "Another example of text data.",
+        "",
+        "Validating text fields with GPT-4.",
+        "Check language consistency.",
+    ] * (len(feature_df) // 5 + 1))[:len(feature_df)]
+
+    print("Simulated text feature added.")
+
+    print("Handling missing values and encoding categorical features...")
+    # Handling missing values
+    # Fill numeric columns with the median value
+    print("Fill numeric columns")
+    numeric_columns = feature_df.select_dtypes(include=['number']).columns
+    feature_df[numeric_columns] = feature_df[numeric_columns].fillna(feature_df[numeric_columns].median())
+    print("Fill categorical columns")
+    # Fill categorical columns with the mode (most frequent value)
+    categorical_columns = feature_df.select_dtypes(include=['object']).columns
+    for column in categorical_columns:
+        feature_df[column].fillna(feature_df[column].mode()[0], inplace=True)
+
+    # Encoding categorical variables
+    le = LabelEncoder()
+    for column in feature_df.select_dtypes(include=['object']).columns:
+        if column not in ['comments']:  # Exclude non-categorical text features if present
+            feature_df[column] = le.fit_transform(feature_df[column])
+
+    # Ensure all required columns exist before splitting
+    required_columns = ['age', 'months_as_customer', 'policy_annual_premium', 'comments']
+    missing_columns = [col for col in required_columns if col not in feature_df.columns]
+    feature_sets = {}
+    if missing_columns:
+        print(f"Error: The following columns are missing and cannot be included in the feature sets: {missing_columns}")
+    else:
+        # Splitting the dataset into multiple feature sets (for simulation purposes)
+        feature_sets = {
+            'set1': feature_df[['age', 'months_as_customer', 'policy_annual_premium', 'comments']],
+            'set2': feature_df[['total_claim_amount', 'incident_severity', 'age', 'comments']],
+            'set3': feature_df[['vehicle_claim', 'property_damage', 'incident_hour_of_the_day', 'comments']]
+        }
+        print("Feature sets created successfully.")
+        print("feature_sets",feature_sets)
+
+    print("feature_sets out",feature_sets)
+    # Define metadata and stats for each feature set
+    for set_name, feature_set in feature_sets.items():
+        print(f"\nProcessing feature set '{set_name}'...")
+
+        # Step 1: Define Metadata
+        print("  Defining metadata...")
+        metadata = {
+            "columns": feature_set.columns.tolist(),
+            "num_rows": feature_set.shape[0],
+            "num_columns": feature_set.shape[1],
+            "missing_values": feature_set.isnull().sum().sum(),
+            "unique_counts": feature_set.nunique(),
+            "data_types": feature_set.dtypes.to_dict(),
+            "original_df": feature_set  # Keep a reference to the original DataFrame
+        }
+        print("  Metadata defined.")
+
+        # Step 2: Generate Statistics
+        print("  Generating statistics...")
+        stats = feature_set.describe(include='all').T
+        print("  Statistics generated.")
+
+        # Step 3: Validate Feature Set
+        print("  Validating feature set...")
+        validator = FeatureSetValidator()  # Assuming you have a validator class
+        validator.validate_feature_set(set_name, feature_set, baseline_df)
+        print(f"  Feature set '{set_name}' validated.")
+
+        # Step 4: Generate Synthetic Data (Optional)
+        print(f"  Generating synthetic data for feature set '{set_name}'...")
+        genai_synth_gen = GenAISyntheticFeatureGenerator(stats, metadata)  # Assuming a synthetic data generator class
+        #synthetic_data = genai_synth_gen.generate_synthetic_data(num_rows=1000)
+        synthetic_data = genai_synth_gen.generate_synthetic_data_with_genai(num_rows=1000,stats=stats)
+        # Save the synthetic data
+        print("Saving the synthetic data")
+        save_synthetic_data(synthetic_data, set_name)
+
+        print(f"  Synthetic data generated for feature set '{set_name}'.")
+
+        # Step 5: Output or Save Results
+        print(f"Synthetic Data for {set_name}:")
+        print(synthetic_data.head())
+        # Optionally, save the synthetic data or validation results if needed
+        synthetic_data.to_csv(f'synthetic_data_{set_name}.csv', index=False)
+
+    print("Processing of all feature sets completed.")
+
+
