@@ -1,0 +1,15 @@
+```
+import pandas as pd
+""
+# Generate synthetic data based on the given statistics
+np.random.seed(0)
+data = pd.DataFrame({
+"""total_claim_amount"": np.random.normal(58055, 26401.53319, 1000),"
+"""incident_severity"": np.random.randint(0, 4, 1000, dtype=""int64""),"
+"""age"": np.random.normal(38.937, 9.158871, 1000),"
+"""comments"": np.random.choice([""This is a sample comment."", ""This is another sample comment."", ""This is a third sample comment."", ""This is a fourth sample comment."", ""This is a fifth sample comment.""], 1000)"
+})
+""
+# Print the synthetic data
+print(data)
+```

@@ -1,0 +1,1001 @@
+vehicle_claim,property_damage,incident_hour_of_the_day,comments
+52080,2,5,This is a sample comment.
+3510,0,8,Another example of text data.
+23100,1,7,
+50720,0,5,Validating text fields with GPT-4.
+4550,1,20,Check language consistency.
+51280,1,19,This is a sample comment.
+50050,0,0,Another example of text data.
+32830,0,23,
+22160,1,21,Validating text fields with GPT-4.
+32900,1,14,Check language consistency.
+63280,2,22,This is a sample comment.
+79560,2,21,Another example of text data.
+42390,2,9,
+5040,1,5,Validating text fields with GPT-4.
+33600,1,12,Check language consistency.
+42080,2,12,This is a sample comment.
+40530,0,0,Another example of text data.
+56640,1,9,
+53040,2,19,Validating text fields with GPT-4.
+48320,0,8,Check language consistency.
+41920,1,20,This is a sample comment.
+33110,0,15,Another example of text data.
+47680,1,20,
+73620,0,15,Validating text fields with GPT-4.
+56640,1,6,Check language consistency.
+44000,1,16,This is a sample comment.
+6560,2,4,Another example of text data.
+4160,2,5,
+46560,1,21,Validating text fields with GPT-4.
+63450,1,5,Check language consistency.
+50400,1,22,This is a sample comment.
+52220,1,10,Another example of text data.
+23170,2,16,
+49070,1,1,Validating text fields with GPT-4.
+48600,2,17,Check language consistency.
+37170,2,15,This is a sample comment.
+48160,0,3,Another example of text data.
+3280,1,16,
+43610,0,4,Validating text fields with GPT-4.
+38290,0,4,Check language consistency.
+28000,1,19,This is a sample comment.
+64720,0,1,Another example of text data.
+40180,2,17,
+39760,1,23,Validating text fields with GPT-4.
+33840,2,14,Check language consistency.
+48230,1,17,This is a sample comment.
+63090,2,11,Another example of text data.
+50240,1,19,
+5670,0,5,Validating text fields with GPT-4.
+53620,1,19,Check language consistency.
+57260,0,19,This is a sample comment.
+5280,0,4,Another example of text data.
+3440,0,8,
+44870,2,7,Validating text fields with GPT-4.
+1680,1,5,Check language consistency.
+55230,2,3,This is a sample comment.
+50160,0,12,Another example of text data.
+1800,1,19,
+51170,2,22,Validating text fields with GPT-4.
+45760,1,12,Check language consistency.
+54040,2,15,This is a sample comment.
+33210,1,23,Another example of text data.
+39410,1,12,
+51390,2,20,Validating text fields with GPT-4.
+45990,1,16,Check language consistency.
+61740,2,6,This is a sample comment.
+62100,2,12,Another example of text data.
+30160,1,17,
+49840,1,8,Validating text fields with GPT-4.
+2580,1,13,Check language consistency.
+49680,0,12,This is a sample comment.
+47670,1,7,Another example of text data.
+27090,1,10,
+42840,1,7,Validating text fields with GPT-4.
+28620,2,18,Check language consistency.
+34140,1,22,This is a sample comment.
+67050,1,18,Another example of text data.
+38010,1,22,
+5580,2,15,Validating text fields with GPT-4.
+50540,0,16,Check language consistency.
+30480,1,6,This is a sample comment.
+4620,0,10,Another example of text data.
+5250,2,3,
+4130,1,13,Validating text fields with GPT-4.
+44320,0,16,Check language consistency.
+40810,2,13,This is a sample comment.
+45600,1,9,Another example of text data.
+40880,0,2,
+3290,1,9,Validating text fields with GPT-4.
+39480,2,12,Check language consistency.
+46350,2,12,This is a sample comment.
+71520,1,14,Another example of text data.
+4720,1,9,
+53010,1,3,Validating text fields with GPT-4.
+68160,1,21,Check language consistency.
+5040,1,5,This is a sample comment.
+59670,2,11,Another example of text data.
+50470,2,4,
+3600,0,6,Validating text fields with GPT-4.
+4200,1,10,Check language consistency.
+47580,2,23,This is a sample comment.
+36960,2,13,Another example of text data.
+25200,0,16,
+2310,1,3,Validating text fields with GPT-4.
+70110,1,15,Check language consistency.
+3360,2,4,This is a sample comment.
+53200,0,6,Another example of text data.
+51940,1,22,
+48870,0,1,Validating text fields with GPT-4.
+44320,1,16,Check language consistency.
+52290,0,18,This is a sample comment.
+49000,2,0,Another example of text data.
+51590,0,12,
+33670,0,13,Validating text fields with GPT-4.
+4720,2,9,Check language consistency.
+33390,1,14,This is a sample comment.
+32620,1,16,Another example of text data.
+51200,0,20,
+63000,1,4,Validating text fields with GPT-4.
+52960,0,7,Check language consistency.
+41580,1,22,This is a sample comment.
+51040,1,11,Another example of text data.
+49280,0,7,
+51420,2,0,Validating text fields with GPT-4.
+28000,2,1,Check language consistency.
+23100,1,12,This is a sample comment.
+28800,1,8,Another example of text data.
+2970,0,9,
+42560,2,22,Validating text fields with GPT-4.
+34790,0,0,Check language consistency.
+56480,2,0,This is a sample comment.
+43050,0,3,Another example of text data.
+34000,0,21,
+32760,0,0,Validating text fields with GPT-4.
+52080,0,16,Check language consistency.
+48440,1,14,This is a sample comment.
+2870,0,9,Another example of text data.
+52400,1,9,
+55360,0,21,Validating text fields with GPT-4.
+49040,1,19,Check language consistency.
+37840,2,2,This is a sample comment.
+3760,0,9,Another example of text data.
+5040,0,5,
+49560,0,14,Validating text fields with GPT-4.
+35490,0,20,Check language consistency.
+76400,2,18,This is a sample comment.
+44800,0,13,Another example of text data.
+37840,0,21,
+53760,1,14,Validating text fields with GPT-4.
+77760,0,1,Check language consistency.
+60160,0,17,This is a sample comment.
+32040,0,4,Another example of text data.
+44010,2,23,
+42160,1,13,Validating text fields with GPT-4.
+36160,1,20,Check language consistency.
+37280,2,16,This is a sample comment.
+50470,0,10,Another example of text data.
+4550,0,8,
+52160,0,17,Validating text fields with GPT-4.
+4340,0,9,Check language consistency.
+3920,2,0,This is a sample comment.
+52650,0,12,Another example of text data.
+59580,1,20,
+75530,2,3,Validating text fields with GPT-4.
+63630,1,18,Check language consistency.
+44640,1,4,This is a sample comment.
+45360,0,18,Another example of text data.
+44800,1,18,
+4620,0,7,Validating text fields with GPT-4.
+5360,1,18,Check language consistency.
+31840,2,23,This is a sample comment.
+40200,0,1,Another example of text data.
+34930,2,15,
+29600,0,2,Validating text fields with GPT-4.
+4270,1,3,Check language consistency.
+47760,0,13,This is a sample comment.
+59920,1,1,Another example of text data.
+39830,2,16,
+58950,2,0,Validating text fields with GPT-4.
+3600,0,1,Check language consistency.
+35770,0,17,This is a sample comment.
+67200,2,13,Another example of text data.
+57890,2,12,
+59520,0,11,Validating text fields with GPT-4.
+43920,0,18,Check language consistency.
+64480,2,17,This is a sample comment.
+13500,0,22,Another example of text data.
+3850,2,9,
+53760,0,11,Validating text fields with GPT-4.
+64820,1,11,Check language consistency.
+3430,2,8,This is a sample comment.
+39270,0,18,Another example of text data.
+38850,1,13,
+5120,2,8,Validating text fields with GPT-4.
+35140,0,9,Check language consistency.
+41760,2,17,This is a sample comment.
+4240,0,3,Another example of text data.
+3900,2,6,
+41580,2,17,Validating text fields with GPT-4.
+1960,0,7,Check language consistency.
+3840,1,9,This is a sample comment.
+61360,0,3,Another example of text data.
+4440,1,6,
+50050,2,7,Validating text fields with GPT-4.
+12720,1,21,Check language consistency.
+43520,1,14,This is a sample comment.
+47840,0,0,Another example of text data.
+57600,0,14,
+43380,1,13,Validating text fields with GPT-4.
+6160,1,8,Check language consistency.
+4080,1,7,This is a sample comment.
+5310,0,9,Another example of text data.
+21450,2,12,
+34020,0,6,Validating text fields with GPT-4.
+61020,2,11,Check language consistency.
+58960,0,5,This is a sample comment.
+47340,1,14,Another example of text data.
+5040,0,17,
+51120,0,0,Validating text fields with GPT-4.
+41670,1,21,Check language consistency.
+44640,2,18,This is a sample comment.
+19670,1,17,Another example of text data.
+31220,2,19,
+44380,0,17,Validating text fields with GPT-4.
+51920,0,23,Check language consistency.
+51450,2,4,This is a sample comment.
+68400,2,2,Another example of text data.
+30310,0,2,
+45920,2,10,Validating text fields with GPT-4.
+57840,0,2,Check language consistency.
+43920,1,18,This is a sample comment.
+24400,1,18,Another example of text data.
+55280,0,7,
+50750,0,19,Validating text fields with GPT-4.
+37520,0,10,Check language consistency.
+57420,1,16,This is a sample comment.
+31990,2,17,Another example of text data.
+57200,1,2,
+51680,0,19,Validating text fields with GPT-4.
+31770,2,0,Check language consistency.
+42800,0,16,This is a sample comment.
+58960,2,20,Another example of text data.
+5040,0,10,
+43600,0,21,Validating text fields with GPT-4.
+2240,2,3,Check language consistency.
+52780,2,7,This is a sample comment.
+45220,2,19,Another example of text data.
+68310,0,15,
+4130,0,7,Validating text fields with GPT-4.
+51280,0,19,Check language consistency.
+40320,2,13,This is a sample comment.
+58800,1,2,Another example of text data.
+6120,2,5,
+41720,0,21,Validating text fields with GPT-4.
+46000,1,21,Check language consistency.
+39360,1,7,This is a sample comment.
+35350,2,16,Another example of text data.
+38460,2,13,
+4620,2,2,Validating text fields with GPT-4.
+37170,0,19,Check language consistency.
+3150,0,17,This is a sample comment.
+47200,0,3,Another example of text data.
+49420,1,17,
+44720,0,5,Validating text fields with GPT-4.
+41920,1,9,Check language consistency.
+4770,1,9,This is a sample comment.
+35520,0,9,Another example of text data.
+54810,1,22,
+32270,2,15,Validating text fields with GPT-4.
+50160,2,14,Check language consistency.
+59710,0,6,This is a sample comment.
+2240,1,6,Another example of text data.
+49680,2,22,
+35820,0,14,Validating text fields with GPT-4.
+43280,1,16,Check language consistency.
+29190,0,10,This is a sample comment.
+49840,2,9,Another example of text data.
+43920,1,4,
+46800,0,6,Validating text fields with GPT-4.
+49630,2,15,Check language consistency.
+31040,1,12,This is a sample comment.
+3010,1,3,Another example of text data.
+4340,2,14,
+41930,0,10,Validating text fields with GPT-4.
+53040,0,17,Check language consistency.
+51120,2,8,This is a sample comment.
+46480,2,14,Another example of text data.
+5120,0,6,
+51940,2,6,Validating text fields with GPT-4.
+5840,1,8,Check language consistency.
+68480,2,13,This is a sample comment.
+34380,0,0,Another example of text data.
+31620,0,14,
+69930,2,13,Validating text fields with GPT-4.
+42720,0,16,Check language consistency.
+48080,0,13,This is a sample comment.
+53970,2,15,Another example of text data.
+2700,0,3,
+4320,2,7,Validating text fields with GPT-4.
+35400,1,16,Check language consistency.
+5760,1,15,This is a sample comment.
+57680,2,21,Another example of text data.
+52380,2,23,
+3780,0,5,Validating text fields with GPT-4.
+46060,2,15,Check language consistency.
+28560,0,14,This is a sample comment.
+38400,0,1,Another example of text data.
+47280,1,14,
+56320,0,17,Validating text fields with GPT-4.
+36560,1,20,Check language consistency.
+58720,1,10,This is a sample comment.
+22800,0,3,Another example of text data.
+24500,0,0,
+47600,0,10,Validating text fields with GPT-4.
+58500,2,13,Check language consistency.
+52850,1,14,This is a sample comment.
+60400,1,22,Another example of text data.
+48240,2,8,
+22190,0,1,Validating text fields with GPT-4.
+49520,2,19,Check language consistency.
+60390,2,17,This is a sample comment.
+44520,2,13,Another example of text data.
+26240,0,4,
+29460,1,14,Validating text fields with GPT-4.
+35280,2,4,Check language consistency.
+61880,2,23,This is a sample comment.
+48400,2,21,Another example of text data.
+47840,2,23,
+37680,0,6,Validating text fields with GPT-4.
+40480,1,21,Check language consistency.
+29760,0,23,This is a sample comment.
+56480,0,3,Another example of text data.
+3760,1,8,
+2030,0,4,Validating text fields with GPT-4.
+46760,0,22,Check language consistency.
+50750,1,16,This is a sample comment.
+34440,1,14,Another example of text data.
+54670,2,13,
+69680,0,20,Validating text fields with GPT-4.
+41220,0,0,Check language consistency.
+45360,2,23,This is a sample comment.
+44800,2,13,Another example of text data.
+47340,0,8,
+4320,0,3,Validating text fields with GPT-4.
+38850,0,16,Check language consistency.
+47280,2,19,This is a sample comment.
+26320,2,0,Another example of text data.
+47430,0,12,
+49200,2,21,Validating text fields with GPT-4.
+44520,0,0,Check language consistency.
+38940,2,22,This is a sample comment.
+25130,0,20,Another example of text data.
+36540,1,0,
+58500,0,20,Validating text fields with GPT-4.
+53760,2,1,Check language consistency.
+46000,1,11,This is a sample comment.
+51570,2,14,Another example of text data.
+43360,2,20,
+48300,0,22,Validating text fields with GPT-4.
+49360,1,12,Check language consistency.
+54670,2,3,This is a sample comment.
+46800,2,15,Another example of text data.
+3600,2,8,
+36600,1,13,Validating text fields with GPT-4.
+4340,1,8,Check language consistency.
+2520,0,7,This is a sample comment.
+2240,0,9,Another example of text data.
+42000,1,15,
+35600,0,5,Validating text fields with GPT-4.
+46680,2,15,Check language consistency.
+35040,2,22,This is a sample comment.
+32080,0,16,Another example of text data.
+54080,1,7,
+4760,2,2,Validating text fields with GPT-4.
+46710,0,17,Check language consistency.
+17010,0,12,This is a sample comment.
+52960,0,9,Another example of text data.
+31850,0,16,
+44200,0,19,Validating text fields with GPT-4.
+35560,0,14,Check language consistency.
+35360,0,18,This is a sample comment.
+45760,2,23,Another example of text data.
+38850,0,15,
+43890,2,18,Validating text fields with GPT-4.
+63770,1,16,Check language consistency.
+38220,1,12,This is a sample comment.
+44560,1,16,Another example of text data.
+48580,0,21,
+39970,2,15,Validating text fields with GPT-4.
+40620,2,21,Check language consistency.
+33880,2,1,This is a sample comment.
+40040,0,17,Another example of text data.
+36190,1,5,
+49140,0,15,Validating text fields with GPT-4.
+33390,1,2,Check language consistency.
+4060,2,3,This is a sample comment.
+54990,1,19,Another example of text data.
+52430,2,17,
+2320,0,7,Validating text fields with GPT-4.
+57690,1,21,Check language consistency.
+56720,2,10,This is a sample comment.
+41310,2,11,Another example of text data.
+32640,2,23,
+60240,0,14,Validating text fields with GPT-4.
+61440,1,10,Check language consistency.
+55860,0,6,This is a sample comment.
+33740,0,10,Another example of text data.
+17600,0,5,
+27510,0,17,Validating text fields with GPT-4.
+2320,1,3,Check language consistency.
+3900,0,9,This is a sample comment.
+4960,2,6,Another example of text data.
+46320,1,22,
+70920,0,10,Validating text fields with GPT-4.
+6240,2,4,Check language consistency.
+44560,1,23,This is a sample comment.
+53580,0,19,Another example of text data.
+38920,2,22,
+3500,1,6,Validating text fields with GPT-4.
+66330,1,6,Check language consistency.
+48510,1,18,This is a sample comment.
+47320,0,22,Another example of text data.
+63180,0,21,
+42420,0,12,Validating text fields with GPT-4.
+45360,0,6,Check language consistency.
+48640,0,0,This is a sample comment.
+46560,1,11,Another example of text data.
+47110,0,19,
+52260,0,22,Validating text fields with GPT-4.
+38990,2,2,Check language consistency.
+51030,2,16,This is a sample comment.
+44460,0,23,Another example of text data.
+42910,2,21,
+40950,0,10,Validating text fields with GPT-4.
+46620,0,12,Check language consistency.
+58720,1,6,This is a sample comment.
+32550,0,6,Another example of text data.
+4480,0,7,
+2320,1,3,Validating text fields with GPT-4.
+4720,2,10,Check language consistency.
+44590,1,14,This is a sample comment.
+54640,1,17,Another example of text data.
+44800,2,16,
+2610,1,3,Validating text fields with GPT-4.
+5180,1,7,Check language consistency.
+42630,2,13,This is a sample comment.
+34580,2,20,Another example of text data.
+50000,2,23,
+43050,1,11,Validating text fields with GPT-4.
+55920,0,0,Check language consistency.
+37380,2,2,This is a sample comment.
+42000,1,3,Another example of text data.
+3120,2,3,
+47250,0,15,Validating text fields with GPT-4.
+39870,0,23,Check language consistency.
+60550,2,9,This is a sample comment.
+6120,0,20,Another example of text data.
+59850,0,5,
+77670,2,15,Validating text fields with GPT-4.
+55650,2,13,Check language consistency.
+55440,1,16,This is a sample comment.
+39680,2,0,Another example of text data.
+35820,1,10,
+61520,1,14,Validating text fields with GPT-4.
+47950,2,1,Check language consistency.
+65120,0,16,This is a sample comment.
+42480,1,2,Another example of text data.
+31590,0,23,
+38400,0,19,Validating text fields with GPT-4.
+35460,1,23,Check language consistency.
+40810,0,10,This is a sample comment.
+57440,2,12,Another example of text data.
+60320,1,15,
+4720,1,3,Validating text fields with GPT-4.
+4720,0,19,Check language consistency.
+44720,1,16,This is a sample comment.
+51040,1,16,Another example of text data.
+43620,0,10,
+4410,1,6,Validating text fields with GPT-4.
+66570,1,18,Check language consistency.
+50800,1,20,This is a sample comment.
+44030,1,14,Another example of text data.
+46410,1,8,
+57050,2,17,Validating text fields with GPT-4.
+30000,1,9,Check language consistency.
+30730,0,0,This is a sample comment.
+48330,1,2,Another example of text data.
+44310,0,23,
+41860,1,8,Validating text fields with GPT-4.
+52200,1,6,Check language consistency.
+1750,2,3,This is a sample comment.
+40590,2,14,Another example of text data.
+46320,1,16,
+46350,0,12,Validating text fields with GPT-4.
+44870,1,1,Check language consistency.
+53520,0,19,This is a sample comment.
+4160,0,7,Another example of text data.
+26480,0,6,
+52020,0,11,Validating text fields with GPT-4.
+53360,2,2,Check language consistency.
+55230,0,15,This is a sample comment.
+34860,1,0,Another example of text data.
+56320,2,12,
+34320,0,1,Validating text fields with GPT-4.
+35880,2,16,Check language consistency.
+38220,1,2,This is a sample comment.
+41510,1,13,Another example of text data.
+38720,1,0,
+43120,0,0,Validating text fields with GPT-4.
+55620,2,16,Check language consistency.
+62300,1,8,This is a sample comment.
+4920,0,9,Another example of text data.
+41160,0,11,
+35820,0,6,Validating text fields with GPT-4.
+45450,1,18,Check language consistency.
+26000,0,11,This is a sample comment.
+32130,0,17,Another example of text data.
+58640,0,21,
+38240,1,0,Validating text fields with GPT-4.
+2560,1,9,Check language consistency.
+56000,1,1,This is a sample comment.
+56070,2,22,Another example of text data.
+39060,1,20,
+42880,2,9,Validating text fields with GPT-4.
+1440,1,5,Check language consistency.
+5300,2,12,This is a sample comment.
+57360,1,6,Another example of text data.
+2100,1,8,
+63300,0,14,Validating text fields with GPT-4.
+54960,2,10,Check language consistency.
+60160,0,12,This is a sample comment.
+58880,0,12,Another example of text data.
+59310,1,12,
+4960,1,13,Validating text fields with GPT-4.
+45520,1,17,Check language consistency.
+39300,1,14,This is a sample comment.
+46240,0,3,Another example of text data.
+49120,2,18,
+3290,2,5,Validating text fields with GPT-4.
+47180,1,19,Check language consistency.
+62370,0,0,This is a sample comment.
+8300,0,22,Another example of text data.
+30590,2,21,
+34020,2,4,Validating text fields with GPT-4.
+37870,2,10,Check language consistency.
+53480,0,5,This is a sample comment.
+48020,0,13,Another example of text data.
+48300,2,18,
+6480,0,6,Validating text fields with GPT-4.
+42770,0,0,Check language consistency.
+34000,0,5,This is a sample comment.
+64800,2,8,Another example of text data.
+2940,2,5,
+5040,2,9,Validating text fields with GPT-4.
+25020,2,10,Check language consistency.
+49210,2,16,This is a sample comment.
+3600,0,8,Another example of text data.
+3440,1,5,
+19110,1,11,Validating text fields with GPT-4.
+39040,0,15,Check language consistency.
+35100,2,23,This is a sample comment.
+58870,1,23,Another example of text data.
+47880,0,23,
+33180,2,10,Validating text fields with GPT-4.
+40390,0,12,Check language consistency.
+74790,1,4,This is a sample comment.
+38010,1,16,Another example of text data.
+21520,0,18,
+59220,2,15,Validating text fields with GPT-4.
+55760,1,8,Check language consistency.
+25480,1,4,This is a sample comment.
+28140,1,20,Another example of text data.
+50330,1,1,
+45180,1,19,Validating text fields with GPT-4.
+33180,1,11,Check language consistency.
+49770,2,13,This is a sample comment.
+48580,0,2,Another example of text data.
+40000,2,9,
+35370,2,15,Validating text fields with GPT-4.
+38520,0,23,Check language consistency.
+42840,1,16,This is a sample comment.
+55360,2,21,Another example of text data.
+58860,2,21,
+43330,1,3,Validating text fields with GPT-4.
+4690,0,4,Check language consistency.
+3570,0,17,This is a sample comment.
+3570,2,7,Another example of text data.
+50680,0,14,
+49630,1,13,Validating text fields with GPT-4.
+52080,0,23,Check language consistency.
+49980,0,23,This is a sample comment.
+50890,0,16,Another example of text data.
+44030,1,17,
+69210,2,9,Validating text fields with GPT-4.
+44520,1,13,Check language consistency.
+52000,2,13,This is a sample comment.
+4000,0,3,Another example of text data.
+3500,0,3,
+36300,0,16,Validating text fields with GPT-4.
+48160,1,12,Check language consistency.
+34960,0,4,This is a sample comment.
+49840,0,3,Another example of text data.
+35000,1,0,
+3850,1,19,Validating text fields with GPT-4.
+53730,0,15,Check language consistency.
+48020,1,6,This is a sample comment.
+46000,0,3,Another example of text data.
+6090,2,17,
+53970,1,4,Validating text fields with GPT-4.
+46200,1,14,Check language consistency.
+39920,1,3,This is a sample comment.
+53840,0,4,Another example of text data.
+39130,0,13,
+59670,1,23,Validating text fields with GPT-4.
+3920,0,3,Check language consistency.
+49490,0,0,This is a sample comment.
+52290,0,14,Another example of text data.
+32480,1,14,
+25150,0,22,Validating text fields with GPT-4.
+34240,1,17,Check language consistency.
+32560,0,14,This is a sample comment.
+25200,0,2,Another example of text data.
+2400,0,4,
+57440,0,2,Validating text fields with GPT-4.
+4480,2,10,Check language consistency.
+62000,2,11,This is a sample comment.
+54630,2,1,Another example of text data.
+3850,0,20,
+63920,1,10,Validating text fields with GPT-4.
+44000,0,20,Check language consistency.
+56140,0,10,This is a sample comment.
+39040,1,2,Another example of text data.
+43040,1,19,
+40770,2,10,Validating text fields with GPT-4.
+39520,2,14,Check language consistency.
+2080,0,5,This is a sample comment.
+4270,2,8,Another example of text data.
+5360,1,4,
+40640,0,4,Validating text fields with GPT-4.
+31140,0,20,Check language consistency.
+65200,0,18,This is a sample comment.
+39690,1,0,Another example of text data.
+50940,0,1,
+37760,1,17,Validating text fields with GPT-4.
+38880,0,23,Check language consistency.
+45680,2,4,This is a sample comment.
+56320,1,0,Another example of text data.
+47810,1,11,
+3680,0,4,Validating text fields with GPT-4.
+39600,0,0,Check language consistency.
+54390,1,2,This is a sample comment.
+54390,2,11,Another example of text data.
+43750,1,23,
+57960,1,17,Validating text fields with GPT-4.
+36270,1,22,Check language consistency.
+76000,2,18,This is a sample comment.
+2730,0,8,Another example of text data.
+41580,0,15,
+46830,0,20,Validating text fields with GPT-4.
+30520,0,4,Check language consistency.
+43960,1,10,This is a sample comment.
+41650,2,10,Another example of text data.
+41580,2,22,
+26530,1,15,Validating text fields with GPT-4.
+44170,0,13,Check language consistency.
+47160,1,23,This is a sample comment.
+46400,0,18,Another example of text data.
+33600,2,7,
+46800,1,21,Validating text fields with GPT-4.
+44160,1,15,Check language consistency.
+49080,0,17,This is a sample comment.
+42800,1,2,Another example of text data.
+24240,2,1,
+26040,0,3,Validating text fields with GPT-4.
+2880,1,0,Check language consistency.
+2940,1,4,This is a sample comment.
+42160,2,11,Another example of text data.
+3360,2,4,
+48510,0,11,Validating text fields with GPT-4.
+24360,1,4,Check language consistency.
+47040,0,20,This is a sample comment.
+1760,2,22,Another example of text data.
+4400,1,4,
+34160,1,21,Validating text fields with GPT-4.
+29280,2,20,Check language consistency.
+35000,1,7,This is a sample comment.
+2880,1,4,Another example of text data.
+61650,0,17,
+37440,2,20,Validating text fields with GPT-4.
+45840,1,10,Check language consistency.
+46160,2,8,This is a sample comment.
+32320,0,6,Another example of text data.
+4200,2,4,
+57900,1,17,Validating text fields with GPT-4.
+45600,0,15,Check language consistency.
+2100,1,9,This is a sample comment.
+34400,0,17,Another example of text data.
+40080,0,13,
+3360,2,5,Validating text fields with GPT-4.
+51570,2,23,Check language consistency.
+52080,1,1,This is a sample comment.
+28240,1,17,Another example of text data.
+1680,2,3,
+46300,0,17,Validating text fields with GPT-4.
+30240,2,23,Check language consistency.
+46800,2,13,This is a sample comment.
+59490,2,17,Another example of text data.
+67590,2,2,
+45850,1,23,Validating text fields with GPT-4.
+39970,1,17,Check language consistency.
+56160,1,3,This is a sample comment.
+2940,1,16,Another example of text data.
+49860,0,13,
+36640,1,8,Validating text fields with GPT-4.
+44550,2,23,Check language consistency.
+38780,2,15,This is a sample comment.
+34930,1,3,Another example of text data.
+49920,1,4,
+73260,2,8,Validating text fields with GPT-4.
+5200,1,21,Check language consistency.
+33480,2,23,This is a sample comment.
+3710,0,8,Another example of text data.
+51540,2,21,
+4740,1,5,Validating text fields with GPT-4.
+26880,1,12,Check language consistency.
+51520,0,7,This is a sample comment.
+1440,1,0,Another example of text data.
+62640,2,14,
+59760,0,13,Validating text fields with GPT-4.
+35210,0,1,Check language consistency.
+30940,1,23,This is a sample comment.
+54540,0,1,Another example of text data.
+56960,2,9,
+72720,0,3,Validating text fields with GPT-4.
+40560,1,0,Check language consistency.
+34140,1,13,This is a sample comment.
+34560,1,18,Another example of text data.
+42240,0,17,
+32200,0,11,Validating text fields with GPT-4.
+6300,2,0,Check language consistency.
+47320,0,14,This is a sample comment.
+27200,1,4,Another example of text data.
+58500,1,2,
+52080,2,9,Validating text fields with GPT-4.
+42420,0,21,Check language consistency.
+54160,1,0,This is a sample comment.
+20510,2,17,Another example of text data.
+55600,1,21,
+34580,2,20,Validating text fields with GPT-4.
+57610,1,5,Check language consistency.
+5840,1,7,This is a sample comment.
+51120,1,6,Another example of text data.
+28980,2,2,
+27660,0,19,Validating text fields with GPT-4.
+57520,2,21,Check language consistency.
+61530,0,3,This is a sample comment.
+42720,0,22,Another example of text data.
+33110,2,22,
+59680,1,16,Validating text fields with GPT-4.
+32240,0,0,Check language consistency.
+34860,0,1,This is a sample comment.
+43400,2,19,Another example of text data.
+40500,0,0,
+41720,0,2,Validating text fields with GPT-4.
+44730,2,5,Check language consistency.
+35000,0,6,This is a sample comment.
+43260,2,21,Another example of text data.
+46960,2,11,
+49350,2,3,Validating text fields with GPT-4.
+34740,0,4,Check language consistency.
+42080,1,2,This is a sample comment.
+25200,0,22,Another example of text data.
+50640,0,8,
+30940,2,14,Validating text fields with GPT-4.
+24640,1,14,Check language consistency.
+70,2,5,This is a sample comment.
+43820,1,18,Another example of text data.
+57060,0,20,
+40320,2,0,Validating text fields with GPT-4.
+60660,0,1,Check language consistency.
+35920,0,10,This is a sample comment.
+46240,1,12,Another example of text data.
+2380,1,6,
+3680,1,1,Validating text fields with GPT-4.
+26080,1,21,Check language consistency.
+38500,2,3,This is a sample comment.
+42960,2,14,Another example of text data.
+22120,1,19,
+28980,2,7,Validating text fields with GPT-4.
+27090,0,0,Check language consistency.
+4240,2,6,This is a sample comment.
+42930,2,0,Another example of text data.
+33600,2,9,
+46160,2,23,Validating text fields with GPT-4.
+42120,1,13,Check language consistency.
+33300,0,0,This is a sample comment.
+67440,0,7,Another example of text data.
+21490,2,23,
+39620,1,7,Validating text fields with GPT-4.
+2640,2,20,Check language consistency.
+24360,2,22,This is a sample comment.
+63600,0,10,Another example of text data.
+44800,0,10,
+56980,2,17,Validating text fields with GPT-4.
+3600,2,3,Check language consistency.
+33600,1,10,This is a sample comment.
+36540,2,1,Another example of text data.
+49200,1,1,
+54740,0,7,Validating text fields with GPT-4.
+32200,0,19,Check language consistency.
+44380,1,3,This is a sample comment.
+3640,1,3,Another example of text data.
+42480,1,23,
+2560,0,7,Validating text fields with GPT-4.
+43740,1,0,Check language consistency.
+49490,0,10,This is a sample comment.
+43760,0,4,Another example of text data.
+54400,0,16,
+2870,2,3,Validating text fields with GPT-4.
+44720,2,5,Check language consistency.
+5040,0,14,This is a sample comment.
+32800,0,7,Another example of text data.
+48480,0,16,
+53480,1,6,Validating text fields with GPT-4.
+37100,2,10,Check language consistency.
+41680,0,19,This is a sample comment.
+41300,0,10,Another example of text data.
+52290,1,6,
+42350,1,12,Validating text fields with GPT-4.
+61760,2,10,Check language consistency.
+44400,1,0,This is a sample comment.
+50240,2,12,Another example of text data.
+3420,2,10,
+45200,1,3,Validating text fields with GPT-4.
+3920,2,21,Check language consistency.
+6300,0,6,This is a sample comment.
+56880,1,0,Another example of text data.
+4320,1,6,
+37360,2,20,Validating text fields with GPT-4.
+36120,1,4,Check language consistency.
+4200,1,9,This is a sample comment.
+38010,0,20,Another example of text data.
+3870,1,7,
+48090,0,18,Validating text fields with GPT-4.
+27860,1,0,Check language consistency.
+43680,0,11,This is a sample comment.
+36890,1,13,Another example of text data.
+53340,2,19,
+58410,2,23,Validating text fields with GPT-4.
+4560,1,23,Check language consistency.
+77670,2,19,This is a sample comment.
+32760,1,19,Another example of text data.
+42240,1,17,
+60720,1,18,Validating text fields with GPT-4.
+46320,1,17,Check language consistency.
+38430,0,11,This is a sample comment.
+52960,0,22,Another example of text data.
+42720,1,7,
+29750,0,17,Validating text fields with GPT-4.
+35600,1,16,Check language consistency.
+37450,1,13,This is a sample comment.
+65920,2,17,Another example of text data.
+40680,2,3,
+59360,0,15,Validating text fields with GPT-4.
+36890,2,16,Check language consistency.
+47740,0,18,This is a sample comment.
+49700,1,18,Another example of text data.
+41510,1,22,
+46830,1,15,Validating text fields with GPT-4.
+29680,2,16,Check language consistency.
+52780,0,18,This is a sample comment.
+2940,1,8,Another example of text data.
+40950,2,23,
+26880,0,18,Validating text fields with GPT-4.
+46270,2,10,Check language consistency.
+35360,1,12,This is a sample comment.
+5390,2,5,Another example of text data.
+40960,0,21,
+38080,2,17,Validating text fields with GPT-4.
+39040,2,4,Check language consistency.
+53840,1,11,This is a sample comment.
+26720,0,18,Another example of text data.
+54530,0,12,
+29890,2,18,Validating text fields with GPT-4.
+40880,1,16,Check language consistency.
+53120,2,19,This is a sample comment.
+48020,1,13,Another example of text data.
+5120,1,4,
+42420,2,8,Validating text fields with GPT-4.
+40960,1,19,Check language consistency.
+38000,2,18,This is a sample comment.
+37730,0,9,Another example of text data.
+1980,0,6,
+6210,2,8,Validating text fields with GPT-4.
+4000,0,6,Check language consistency.
+38640,0,23,This is a sample comment.
+5280,1,13,Another example of text data.
+41160,1,3,
+47360,1,23,Validating text fields with GPT-4.
+3290,2,8,Check language consistency.
+55520,2,23,This is a sample comment.
+32400,2,23,Another example of text data.
+45000,1,9,
+44880,2,22,Validating text fields with GPT-4.
+58870,2,22,Check language consistency.
+51440,1,15,This is a sample comment.
+51520,1,16,Another example of text data.
+64720,0,17,
+4500,2,3,Validating text fields with GPT-4.
+21490,0,10,Check language consistency.
+26040,1,9,This is a sample comment.
+43620,0,13,Another example of text data.
+31040,2,15,
+71820,0,23,Validating text fields with GPT-4.
+43680,2,2,Check language consistency.
+63280,2,14,This is a sample comment.
+2800,0,7,Another example of text data.
+41760,1,23,
+50640,2,7,Validating text fields with GPT-4.
+55280,2,8,Check language consistency.
+32160,1,17,This is a sample comment.
+41600,1,10,Another example of text data.
+1960,1,9,
+55120,2,2,Validating text fields with GPT-4.
+23760,1,18,Check language consistency.
+2580,0,4,This is a sample comment.
+66560,0,12,Another example of text data.
+54320,2,15,
+3360,2,9,Validating text fields with GPT-4.
+35000,2,6,Check language consistency.
+39600,2,11,This is a sample comment.
+49120,1,13,Another example of text data.
+35980,0,4,
+32520,2,20,Validating text fields with GPT-4.
+40740,1,0,Check language consistency.
+47320,0,18,This is a sample comment.
+42720,0,6,Another example of text data.
+43080,0,23,
+59710,0,4,Validating text fields with GPT-4.
+38850,0,21,Check language consistency.
+3870,0,7,This is a sample comment.
+29820,0,19,Another example of text data.
+2730,1,5,
+54950,2,22,Validating text fields with GPT-4.
+55090,2,12,Check language consistency.
+45360,1,19,This is a sample comment.
+47700,0,10,Another example of text data.
+33880,1,7,
+40560,1,17,Validating text fields with GPT-4.
+45440,0,0,Check language consistency.
+3760,1,9,This is a sample comment.
+46160,0,21,Another example of text data.
+59680,1,22,
+3360,1,3,Validating text fields with GPT-4.
+35140,2,16,Check language consistency.
+31570,2,14,This is a sample comment.
+52920,2,21,Another example of text data.
+54810,1,19,
+33600,1,13,Validating text fields with GPT-4.
+2100,1,21,Check language consistency.
+40040,1,11,This is a sample comment.
+5520,0,16,Another example of text data.
+55440,1,9,
+3360,1,8,Validating text fields with GPT-4.
+2730,0,7,Check language consistency.
+72320,0,12,This is a sample comment.
+44030,2,21,Another example of text data.
+37940,2,4,
+36260,1,18,Validating text fields with GPT-4.
+4800,0,7,Check language consistency.
+53920,2,13,This is a sample comment.
+47460,1,0,Another example of text data.
+38780,0,22,
+34370,2,15,Validating text fields with GPT-4.
+75600,1,3,Check language consistency.
+48400,2,18,This is a sample comment.
+49280,0,17,Another example of text data.
+39960,0,18,
+53830,0,11,Validating text fields with GPT-4.
+34720,1,17,Check language consistency.
+67230,2,12,This is a sample comment.
+42770,0,15,Another example of text data.
+36330,0,0,
+2580,0,9,Validating text fields with GPT-4.
+34260,2,1,Check language consistency.
+61520,0,22,This is a sample comment.
+53900,2,11,Another example of text data.
+41760,0,10,
+42490,2,5,Validating text fields with GPT-4.
+47360,2,3,Check language consistency.
+26670,0,18,This is a sample comment.
+41760,1,21,Another example of text data.
+25690,2,6,
+48160,0,20,Validating text fields with GPT-4.
+4860,0,6,Check language consistency.
+61040,2,20,This is a sample comment.
+72320,2,23,Another example of text data.
+52500,0,4,
+36540,0,2,Validating text fields with GPT-4.
+3680,0,6,Check language consistency.

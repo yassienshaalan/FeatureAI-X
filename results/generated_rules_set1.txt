@@ -1,0 +1,44 @@
+**Data Validation Rules**
+
+**Completeness**
+
+* Ensure that no fields have missing values.
+
+**Consistency**
+
+* Check for duplicate records based on unique identifiers (e.g., customer ID).
+
+**Uniqueness**
+
+* Ensure that unique identifiers (e.g., customer ID) are actually unique.
+
+**Range Checks**
+
+* Validate that 'age' falls between 18 and 64.
+* Validate that 'months_as_customer' falls between 0 and 479.
+* Validate that 'policy_annual_premium' falls between 433 and 2047.
+
+**Domain Checks**
+
+* Verify that 'comments' contains only valid categories based on historical data.
+
+**Text Quality Checks**
+
+* Check 'comments' for completeness, readability, sentiment, and keyword presence.
+
+**Outlier Detection**
+
+* Identify any values that significantly deviate from the expected range or distribution.
+* For example, 'age' values below 18 or above 64 could be considered outliers.
+
+**Feature Drift Detection**
+
+* Compare the current dataset statistics to a baseline dataset.
+* Identify any significant changes in the distribution or statistics of features over time, which could indicate feature drift.
+
+**Additional Guidance**
+
+* Use automated tools to streamline data validation processes.
+* Perform regular data quality audits to ensure ongoing compliance with validation rules.
+* Involve subject matter experts to provide insights and ensure the accuracy of domain-specific checks.
+* Establish data quality monitoring processes to proactively detect and address data quality issues.

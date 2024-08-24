@@ -1,0 +1,905 @@
+2024-08-24 15:11:47,426 - INFO - Logging setup complete.
+2024-08-24 15:11:47,428 - INFO - This is an info message that will also be logged.
+This will be printed to the console and logged to the file.
+Loading baseline and new feature sets...
+Loading baseline df
+Read 1000 records
+Columns after loading: ['months_as_customer', 'age', 'policy_number', 'policy_bind_date', 'policy_state', 'policy_csl', 'policy_deductable', 'policy_annual_premium', 'umbrella_limit', 'insured_zip', 'insured_sex', 'insured_education_level', 'insured_occupation', 'insured_hobbies', 'insured_relationship', 'capital-gains', 'capital-loss', 'incident_date', 'incident_type', 'collision_type', 'incident_severity', 'authorities_contacted', 'incident_state', 'incident_city', 'incident_location', 'incident_hour_of_the_day', 'number_of_vehicles_involved', 'property_damage', 'bodily_injuries', 'witnesses', 'police_report_available', 'total_claim_amount', 'injury_claim', 'property_claim', 'vehicle_claim', 'auto_make', 'auto_model', 'auto_year', 'fraud_reported']
+Loading new df
+Read 1000 records
+Columns after loading: ['months_as_customer', 'age', 'policy_number', 'policy_bind_date', 'policy_state', 'policy_csl', 'policy_deductable', 'policy_annual_premium', 'umbrella_limit', 'insured_zip', 'insured_sex', 'insured_education_level', 'insured_occupation', 'insured_hobbies', 'insured_relationship', 'capital-gains', 'capital-loss', 'incident_date', 'incident_type', 'collision_type', 'incident_severity', 'authorities_contacted', 'incident_state', 'incident_city', 'incident_location', 'incident_hour_of_the_day', 'number_of_vehicles_involved', 'property_damage', 'bodily_injuries', 'witnesses', 'police_report_available', 'total_claim_amount', 'injury_claim', 'property_claim', 'vehicle_claim', 'auto_make', 'auto_model', 'auto_year', 'fraud_reported']
+Feature sets loaded successfully.
+Available columns in feature_df: ['months_as_customer', 'age', 'policy_number', 'policy_bind_date', 'policy_state', 'policy_csl', 'policy_deductable', 'policy_annual_premium', 'umbrella_limit', 'insured_zip', 'insured_sex', 'insured_education_level', 'insured_occupation', 'insured_hobbies', 'insured_relationship', 'capital-gains', 'capital-loss', 'incident_date', 'incident_type', 'collision_type', 'incident_severity', 'authorities_contacted', 'incident_state', 'incident_city', 'incident_location', 'incident_hour_of_the_day', 'number_of_vehicles_involved', 'property_damage', 'bodily_injuries', 'witnesses', 'police_report_available', 'total_claim_amount', 'injury_claim', 'property_claim', 'vehicle_claim', 'auto_make', 'auto_model', 'auto_year', 'fraud_reported']
+Specify the date format explicitly
+Adding simulated text feature...
+Simulated text feature added.
+Handling missing values and encoding categorical features...
+Fill numeric columns
+Fill categorical columns
+Feature sets created successfully.
+feature_sets {'set1':      age  months_as_customer  policy_annual_premium                            comments
+0     48                 328                1406.91           This is a sample comment.
+1     42                 228                1197.22       Another example of text data.
+2     18                 134                1413.14                                    
+3     41                 256                1415.74  Validating text fields with GPT-4.
+4     44                 228                1583.91         Check language consistency.
+..   ...                 ...                    ...                                 ...
+995   38                   3                1310.80           This is a sample comment.
+996   41                 285                1436.79       Another example of text data.
+997   34                 130                1383.49                                    
+998   62                 458                1356.92  Validating text fields with GPT-4.
+999   60                 456                 766.19         Check language consistency.
+
+[1000 rows x 4 columns], 'set2':      total_claim_amount  incident_severity  age                            comments
+0                 71610                  0   48           This is a sample comment.
+1                  5070                  1   42       Another example of text data.
+2                 34650                  1   18                                    
+3                 63400                  0   41  Validating text fields with GPT-4.
+4                  6500                  1   44         Check language consistency.
+..                  ...                ...  ...                                 ...
+995               87200                  1   38           This is a sample comment.
+996              108480                  0   41       Another example of text data.
+997               67500                  1   34                                    
+998               46980                  0   62  Validating text fields with GPT-4.
+999                5060                  1   60         Check language consistency.
+
+[1000 rows x 4 columns], 'set3':      vehicle_claim  property_damage  incident_hour_of_the_day                            comments
+0            52080                2                         5           This is a sample comment.
+1             3510                0                         8       Another example of text data.
+2            23100                1                         7                                    
+3            50720                0                         5  Validating text fields with GPT-4.
+4             4550                1                        20         Check language consistency.
+..             ...              ...                       ...                                 ...
+995          61040                2                        20           This is a sample comment.
+996          72320                2                        23       Another example of text data.
+997          52500                0                         4                                    
+998          36540                0                         2  Validating text fields with GPT-4.
+999           3680                0                         6         Check language consistency.
+
+[1000 rows x 4 columns]}
+feature_sets out {'set1':      age  months_as_customer  policy_annual_premium                            comments
+0     48                 328                1406.91           This is a sample comment.
+1     42                 228                1197.22       Another example of text data.
+2     18                 134                1413.14                                    
+3     41                 256                1415.74  Validating text fields with GPT-4.
+4     44                 228                1583.91         Check language consistency.
+..   ...                 ...                    ...                                 ...
+995   38                   3                1310.80           This is a sample comment.
+996   41                 285                1436.79       Another example of text data.
+997   34                 130                1383.49                                    
+998   62                 458                1356.92  Validating text fields with GPT-4.
+999   60                 456                 766.19         Check language consistency.
+
+[1000 rows x 4 columns], 'set2':      total_claim_amount  incident_severity  age                            comments
+0                 71610                  0   48           This is a sample comment.
+1                  5070                  1   42       Another example of text data.
+2                 34650                  1   18                                    
+3                 63400                  0   41  Validating text fields with GPT-4.
+4                  6500                  1   44         Check language consistency.
+..                  ...                ...  ...                                 ...
+995               87200                  1   38           This is a sample comment.
+996              108480                  0   41       Another example of text data.
+997               67500                  1   34                                    
+998               46980                  0   62  Validating text fields with GPT-4.
+999                5060                  1   60         Check language consistency.
+
+[1000 rows x 4 columns], 'set3':      vehicle_claim  property_damage  incident_hour_of_the_day                            comments
+0            52080                2                         5           This is a sample comment.
+1             3510                0                         8       Another example of text data.
+2            23100                1                         7                                    
+3            50720                0                         5  Validating text fields with GPT-4.
+4             4550                1                        20         Check language consistency.
+..             ...              ...                       ...                                 ...
+995          61040                2                        20           This is a sample comment.
+996          72320                2                        23       Another example of text data.
+997          52500                0                         4                                    
+998          36540                0                         2  Validating text fields with GPT-4.
+999           3680                0                         6         Check language consistency.
+
+[1000 rows x 4 columns]}
+
+Processing feature set 'set1'...
+  Defining metadata...
+  Metadata defined.
+  Generating statistics...
+  Statistics generated.
+  Validating feature set...
+Validating feature set 'set1'...
+Generating validation rules with gemini
+Generated prompt for feature validation:
+Generate a set of comprehensive data validation rules based on the following dataset statistics:
+- 'age' should have values between 18 and 64.
+- 'months_as_customer' should have values between 0 and 479.
+- 'policy_annual_premium' should have values between 433 and 2047.
+- 'comments' should only contain valid categories based on historical data.
+- 'comments' should be checked for completeness, readability, sentiment, and keyword presence.
+Ensure that the rules cover completeness, consistency, uniqueness, range checks, and any potential outliers. Additionally, provide guidance on detecting feature drift compared to a baseline dataset.
+Fetching response, please wait......
+Generated Validation Rules for set1:
+ ## Data Validation Rules
+
+**Completeness**
+
+* All rows should have a value for all columns.
+
+**Consistency**
+
+* 'age' values should match the chronological age of the customer.
+* 'months_as_customer' should be consistent with the customer's account creation date.
+* 'policy_annual_premium' should be consistent with the policy type and coverage details.
+* 'comments' should align with the corresponding customer's history and feedback.
+
+**Uniqueness**
+
+* 'age' should be unique for each customer.
+* 'months_as_customer' should be unique for each customer.
+* 'policy_annual_premium' should be unique for each customer's policy.
+
+**Range Checks**
+
+* 'age' should be between 18 and 64.
+* 'months_as_customer' should be between 0 and 479.
+* 'policy_annual_premium' should be between 433 and 2047.
+
+**Outliers**
+
+* Values that fall outside the defined ranges should be flagged as outliers.
+* Customers with extreme values in 'age' or 'months_as_customer' should be reviewed.
+
+**'comments' Category Check**
+
+* 'comments' should be assigned to valid categories based on historical data.
+* Valid categories might include: positive feedback, negative feedback, product suggestions, etc.
+
+**'comments' Quality Check**
+
+* 'comments' should be checked for completeness (e.g., no missing words or phrases).
+* 'comments' should be readable and well-written.
+* 'comments' should be checked for sentiment (e.g., positive, negative, neutral).
+* 'comments' should be checked for presence of relevant keywords.
+
+## Feature Drift Detection
+
+To detect feature drift compared to a baseline dataset:
+
+* Use statistical tests (e.g., Kolmogorov-Smirnov test) to compare the distributions of features in the new dataset to the baseline.
+* Calculate metrics such as mean, standard deviation, and variance to identify significant changes.
+* Monitor the frequency of invalid values or outliers.
+* Review 'comments' for changes in sentiment or keyword presence.
+Data Quality Issues Found in set1:
+- Row 2 in 'comments' is empty.
+- Row 7 in 'comments' is empty.
+- Row 12 in 'comments' is empty.
+- Row 17 in 'comments' is empty.
+- Row 22 in 'comments' is empty.
+- Row 27 in 'comments' is empty.
+- Row 32 in 'comments' is empty.
+- Row 37 in 'comments' is empty.
+- Row 42 in 'comments' is empty.
+- Row 47 in 'comments' is empty.
+- Row 52 in 'comments' is empty.
+- Row 57 in 'comments' is empty.
+- Row 62 in 'comments' is empty.
+- Row 67 in 'comments' is empty.
+- Row 72 in 'comments' is empty.
+- Row 77 in 'comments' is empty.
+- Row 82 in 'comments' is empty.
+- Row 87 in 'comments' is empty.
+- Row 92 in 'comments' is empty.
+- Row 97 in 'comments' is empty.
+- Row 102 in 'comments' is empty.
+- Row 107 in 'comments' is empty.
+- Row 112 in 'comments' is empty.
+- Row 117 in 'comments' is empty.
+- Row 122 in 'comments' is empty.
+- Row 127 in 'comments' is empty.
+- Row 132 in 'comments' is empty.
+- Row 137 in 'comments' is empty.
+- Row 142 in 'comments' is empty.
+- Row 147 in 'comments' is empty.
+- Row 152 in 'comments' is empty.
+- Row 157 in 'comments' is empty.
+- Row 162 in 'comments' is empty.
+- Row 167 in 'comments' is empty.
+- Row 172 in 'comments' is empty.
+- Row 177 in 'comments' is empty.
+- Row 182 in 'comments' is empty.
+- Row 187 in 'comments' is empty.
+- Row 192 in 'comments' is empty.
+- Row 197 in 'comments' is empty.
+- Row 202 in 'comments' is empty.
+- Row 207 in 'comments' is empty.
+- Row 212 in 'comments' is empty.
+- Row 217 in 'comments' is empty.
+- Row 222 in 'comments' is empty.
+- Row 227 in 'comments' is empty.
+- Row 232 in 'comments' is empty.
+- Row 237 in 'comments' is empty.
+- Row 242 in 'comments' is empty.
+- Row 247 in 'comments' is empty.
+- Row 252 in 'comments' is empty.
+2024-08-24 15:13:32,950 - INFO - Synthetic data for 'set1' saved to results\synthetic_data_set1.csv
+- Row 257 in 'comments' is empty.
+- Row 262 in 'comments' is empty.
+- Row 267 in 'comments' is empty.
+- Row 272 in 'comments' is empty.
+- Row 277 in 'comments' is empty.
+- Row 282 in 'comments' is empty.
+- Row 287 in 'comments' is empty.
+- Row 292 in 'comments' is empty.
+- Row 297 in 'comments' is empty.
+- Row 302 in 'comments' is empty.
+- Row 307 in 'comments' is empty.
+- Row 312 in 'comments' is empty.
+- Row 317 in 'comments' is empty.
+- Row 322 in 'comments' is empty.
+- Row 327 in 'comments' is empty.
+- Row 332 in 'comments' is empty.
+- Row 337 in 'comments' is empty.
+- Row 342 in 'comments' is empty.
+- Row 347 in 'comments' is empty.
+- Row 352 in 'comments' is empty.
+- Row 357 in 'comments' is empty.
+- Row 362 in 'comments' is empty.
+- Row 367 in 'comments' is empty.
+- Row 372 in 'comments' is empty.
+- Row 377 in 'comments' is empty.
+- Row 382 in 'comments' is empty.
+- Row 387 in 'comments' is empty.
+- Row 392 in 'comments' is empty.
+- Row 397 in 'comments' is empty.
+- Row 402 in 'comments' is empty.
+- Row 407 in 'comments' is empty.
+- Row 412 in 'comments' is empty.
+- Row 417 in 'comments' is empty.
+- Row 422 in 'comments' is empty.
+- Row 427 in 'comments' is empty.
+- Row 432 in 'comments' is empty.
+- Row 437 in 'comments' is empty.
+- Row 442 in 'comments' is empty.
+- Row 447 in 'comments' is empty.
+- Row 452 in 'comments' is empty.
+- Row 457 in 'comments' is empty.
+- Row 462 in 'comments' is empty.
+- Row 467 in 'comments' is empty.
+- Row 472 in 'comments' is empty.
+- Row 477 in 'comments' is empty.
+- Row 482 in 'comments' is empty.
+- Row 487 in 'comments' is empty.
+- Row 492 in 'comments' is empty.
+- Row 497 in 'comments' is empty.
+- Row 502 in 'comments' is empty.
+- Row 507 in 'comments' is empty.
+- Row 512 in 'comments' is empty.
+- Row 517 in 'comments' is empty.
+- Row 522 in 'comments' is empty.
+- Row 527 in 'comments' is empty.
+- Row 532 in 'comments' is empty.
+- Row 537 in 'comments' is empty.
+- Row 542 in 'comments' is empty.
+- Row 547 in 'comments' is empty.
+- Row 552 in 'comments' is empty.
+- Row 557 in 'comments' is empty.
+- Row 562 in 'comments' is empty.
+- Row 567 in 'comments' is empty.
+- Row 572 in 'comments' is empty.
+- Row 577 in 'comments' is empty.
+- Row 582 in 'comments' is empty.
+- Row 587 in 'comments' is empty.
+- Row 592 in 'comments' is empty.
+- Row 597 in 'comments' is empty.
+- Row 602 in 'comments' is empty.
+- Row 607 in 'comments' is empty.
+- Row 612 in 'comments' is empty.
+- Row 617 in 'comments' is empty.
+- Row 622 in 'comments' is empty.
+- Row 627 in 'comments' is empty.
+- Row 632 in 'comments' is empty.
+- Row 637 in 'comments' is empty.
+- Row 642 in 'comments' is empty.
+- Row 647 in 'comments' is empty.
+- Row 652 in 'comments' is empty.
+- Row 657 in 'comments' is empty.
+- Row 662 in 'comments' is empty.
+- Row 667 in 'comments' is empty.
+- Row 672 in 'comments' is empty.
+- Row 677 in 'comments' is empty.
+- Row 682 in 'comments' is empty.
+- Row 687 in 'comments' is empty.
+- Row 692 in 'comments' is empty.
+- Row 697 in 'comments' is empty.
+- Row 702 in 'comments' is empty.
+- Row 707 in 'comments' is empty.
+- Row 712 in 'comments' is empty.
+- Row 717 in 'comments' is empty.
+- Row 722 in 'comments' is empty.
+- Row 727 in 'comments' is empty.
+- Row 732 in 'comments' is empty.
+- Row 737 in 'comments' is empty.
+- Row 742 in 'comments' is empty.
+- Row 747 in 'comments' is empty.
+- Row 752 in 'comments' is empty.
+- Row 757 in 'comments' is empty.
+- Row 762 in 'comments' is empty.
+- Row 767 in 'comments' is empty.
+- Row 772 in 'comments' is empty.
+- Row 777 in 'comments' is empty.
+- Row 782 in 'comments' is empty.
+- Row 787 in 'comments' is empty.
+- Row 792 in 'comments' is empty.
+- Row 797 in 'comments' is empty.
+- Row 802 in 'comments' is empty.
+- Row 807 in 'comments' is empty.
+- Row 812 in 'comments' is empty.
+- Row 817 in 'comments' is empty.
+- Row 822 in 'comments' is empty.
+- Row 827 in 'comments' is empty.
+- Row 832 in 'comments' is empty.
+- Row 837 in 'comments' is empty.
+- Row 842 in 'comments' is empty.
+- Row 847 in 'comments' is empty.
+- Row 852 in 'comments' is empty.
+- Row 857 in 'comments' is empty.
+- Row 862 in 'comments' is empty.
+- Row 867 in 'comments' is empty.
+- Row 872 in 'comments' is empty.
+- Row 877 in 'comments' is empty.
+- Row 882 in 'comments' is empty.
+- Row 887 in 'comments' is empty.
+- Row 892 in 'comments' is empty.
+- Row 897 in 'comments' is empty.
+- Row 902 in 'comments' is empty.
+- Row 907 in 'comments' is empty.
+- Row 912 in 'comments' is empty.
+- Row 917 in 'comments' is empty.
+- Row 922 in 'comments' is empty.
+- Row 927 in 'comments' is empty.
+- Row 932 in 'comments' is empty.
+- Row 937 in 'comments' is empty.
+- Row 942 in 'comments' is empty.
+- Row 947 in 'comments' is empty.
+- Row 952 in 'comments' is empty.
+- Row 957 in 'comments' is empty.
+- Row 962 in 'comments' is empty.
+- Row 967 in 'comments' is empty.
+- Row 972 in 'comments' is empty.
+- Row 977 in 'comments' is empty.
+- Row 982 in 'comments' is empty.
+- Row 987 in 'comments' is empty.
+- Row 992 in 'comments' is empty.
+- Row 997 in 'comments' is empty.
+Dataset for 'set1' saved as data_set1.csv
+Generated code snippets saved to results\code_snippets_set1.py
+Error executing code snippets: f-string: unmatched '[' (<string>, line 51)
+Metrics saved to results\validated_metrics_set1.txt
+Generated rules saved to results\generated_rules_set1.txt
+Validation for 'set1' completed.
+  Feature set 'set1' validated.
+  Generating synthetic data for feature set 'set1'...
+synthetic_response
+```
+age,months_as_customer,policy_annual_premium,comments
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+38,276.25,1256.40615,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment.
+32,199.5,1415.695,This is a sample comment.
+44,479,2047.59,This is a sample comment.
+32,0,433.33,This is a sample comment.
+38,115.75,1257.2,This is a sample comment
+Error parsing the synthetic data: name 'd' is not defined
+Saving the synthetic data
+  Synthetic data generated for feature set 'set1'.
+Synthetic Data for set1:
+Empty DataFrame
+Columns: []
+Index: []
+
+Processing feature set 'set2'...
+  Defining metadata...
+  Metadata defined.
+  Generating statistics...
+  Statistics generated.
+  Validating feature set...
+Validating feature set 'set2'...
+Generating validation rules with gemini
+Generated prompt for feature validation:
+Generate a set of comprehensive data validation rules based on the following dataset statistics:
+- 'total_claim_amount' should have values between 100 and 114920.
+- 'incident_severity' should have values between 0 and 3.
+- 'age' should have values between 18 and 64.
+- 'comments' should only contain valid categories based on historical data.
+- 'comments' should be checked for completeness, readability, sentiment, and keyword presence.
+Ensure that the rules cover completeness, consistency, uniqueness, range checks, and any potential outliers. Additionally, provide guidance on detecting feature drift compared to a baseline dataset.
+Fetching response, please wait......
+Generated Validation Rules for set2:
+ **Data Validation Rules**
+
+**Completeness**
+- Ensure that all required fields have non-null or non-empty values.
+
+**Consistency**
+- Verify that 'total_claim_amount' is within the expected range (100-114920).
+- Check that 'incident_severity' only takes values between 0 and 3.
+- Confirm that 'age' falls within the specified range (18-64).
+
+**Uniqueness**
+- Identify any duplicate claims based on unique identifiers (if available).
+
+**Range Checks**
+- Validate that 'total_claim_amount' is positive.
+- Ensure that 'age' is within the acceptable range (18-64).
+
+**Categorical Validation**
+- Restrict 'comments' to authorized categories based on historical data.
+
+**NLP-Based Validation (for 'comments')**
+- **Completeness:** Check for empty or missing comments.
+- **Readability:** Analyze readability scores (e.g., Flesch-Kincaid index) to ensure ease of understanding.
+- **Sentiment:** Determine if the comments convey positive or negative sentiment.
+- **Keyword Presence:** Identify the presence of specific keywords or phrases that may indicate fraud or other issues.
+
+**Anomaly Detection (Outlier Handling)**
+- Set thresholds for extreme values of 'total_claim_amount' and investigate any outliers that fall outside of these limits.
+- Monitor changes in the distribution of 'incident_severity' over time to detect any significant deviations.
+
+**Feature Drift Detection**
+- Compare the statistics of the current dataset to a baseline dataset.
+- Track changes in variable distributions, means, and variances to identify any shifts.
+- Implement drift detection algorithms to monitor for significant changes that may impact model accuracy.
+Data Quality Issues Found in set2:
+- Row 2 in 'comments' is empty.
+- Row 7 in 'comments' is empty.
+- Row 12 in 'comments' is empty.
+- Row 17 in 'comments' is empty.
+- Row 22 in 'comments' is empty.
+- Row 27 in 'comments' is empty.
+- Row 32 in 'comments' is empty.
+- Row 37 in 'comments' is empty.
+- Row 42 in 'comments' is empty.
+- Row 47 in 'comments' is empty.
+- Row 52 in 'comments' is empty.
+- Row 57 in 'comments' is empty.
+- Row 62 in 'comments' is empty.
+- Row 67 in 'comments' is empty.
+- Row 72 in 'comments' is empty.
+- Row 77 in 'comments' is empty.
+- Row 82 in 'comments' is empty.
+- Row 87 in 'comments' is empty.
+- Row 92 in 'comments' is empty.
+- Row 97 in 'comments' is empty.
+- Row 102 in 'comments' is empty.
+- Row 107 in 'comments' is empty.
+- Row 112 in 'comments' is empty.
+- Row 117 in 'comments' is empty.
+- Row 122 in 'comments' is empty.
+- Row 127 in 'comments' is empty.
+- Row 132 in 'comments' is empty.
+- Row 137 in 'comments' is empty.
+- Row 142 in 'comments' is empty.
+- Row 147 in 'comments' is empty.
+- Row 152 in 'comments' is empty.
+- Row 157 in 'comments' is empty.
+- Row 162 in 'comments' is empty.
+- Row 167 in 'comments' is empty.
+- Row 172 in 'comments' is empty.
+- Row 177 in 'comments' is empty.
+- Row 182 in 'comments' is empty.
+- Row 187 in 'comments' is empty.
+- Row 192 in 'comments' is empty.
+- Row 197 in 'comments' is empty.
+2024-08-24 15:15:01,271 - INFO - Synthetic data for 'set2' saved to results\synthetic_data_set2.csv
+- Row 202 in 'comments' is empty.
+- Row 207 in 'comments' is empty.
+- Row 212 in 'comments' is empty.
+- Row 217 in 'comments' is empty.
+- Row 222 in 'comments' is empty.
+- Row 227 in 'comments' is empty.
+- Row 232 in 'comments' is empty.
+- Row 237 in 'comments' is empty.
+- Row 242 in 'comments' is empty.
+- Row 247 in 'comments' is empty.
+- Row 252 in 'comments' is empty.
+- Row 257 in 'comments' is empty.
+- Row 262 in 'comments' is empty.
+- Row 267 in 'comments' is empty.
+- Row 272 in 'comments' is empty.
+- Row 277 in 'comments' is empty.
+- Row 282 in 'comments' is empty.
+- Row 287 in 'comments' is empty.
+- Row 292 in 'comments' is empty.
+- Row 297 in 'comments' is empty.
+- Row 302 in 'comments' is empty.
+- Row 307 in 'comments' is empty.
+- Row 312 in 'comments' is empty.
+- Row 317 in 'comments' is empty.
+- Row 322 in 'comments' is empty.
+- Row 327 in 'comments' is empty.
+- Row 332 in 'comments' is empty.
+- Row 337 in 'comments' is empty.
+- Row 342 in 'comments' is empty.
+- Row 347 in 'comments' is empty.
+- Row 352 in 'comments' is empty.
+- Row 357 in 'comments' is empty.
+- Row 362 in 'comments' is empty.
+- Row 367 in 'comments' is empty.
+- Row 372 in 'comments' is empty.
+- Row 377 in 'comments' is empty.
+- Row 382 in 'comments' is empty.
+- Row 387 in 'comments' is empty.
+- Row 392 in 'comments' is empty.
+- Row 397 in 'comments' is empty.
+- Row 402 in 'comments' is empty.
+- Row 407 in 'comments' is empty.
+- Row 412 in 'comments' is empty.
+- Row 417 in 'comments' is empty.
+- Row 422 in 'comments' is empty.
+- Row 427 in 'comments' is empty.
+- Row 432 in 'comments' is empty.
+- Row 437 in 'comments' is empty.
+- Row 442 in 'comments' is empty.
+- Row 447 in 'comments' is empty.
+- Row 452 in 'comments' is empty.
+- Row 457 in 'comments' is empty.
+- Row 462 in 'comments' is empty.
+- Row 467 in 'comments' is empty.
+- Row 472 in 'comments' is empty.
+- Row 477 in 'comments' is empty.
+- Row 482 in 'comments' is empty.
+- Row 487 in 'comments' is empty.
+- Row 492 in 'comments' is empty.
+- Row 497 in 'comments' is empty.
+- Row 502 in 'comments' is empty.
+- Row 507 in 'comments' is empty.
+- Row 512 in 'comments' is empty.
+- Row 517 in 'comments' is empty.
+- Row 522 in 'comments' is empty.
+- Row 527 in 'comments' is empty.
+- Row 532 in 'comments' is empty.
+- Row 537 in 'comments' is empty.
+- Row 542 in 'comments' is empty.
+- Row 547 in 'comments' is empty.
+- Row 552 in 'comments' is empty.
+- Row 557 in 'comments' is empty.
+- Row 562 in 'comments' is empty.
+- Row 567 in 'comments' is empty.
+- Row 572 in 'comments' is empty.
+- Row 577 in 'comments' is empty.
+- Row 582 in 'comments' is empty.
+- Row 587 in 'comments' is empty.
+- Row 592 in 'comments' is empty.
+- Row 597 in 'comments' is empty.
+- Row 602 in 'comments' is empty.
+- Row 607 in 'comments' is empty.
+- Row 612 in 'comments' is empty.
+- Row 617 in 'comments' is empty.
+- Row 622 in 'comments' is empty.
+- Row 627 in 'comments' is empty.
+- Row 632 in 'comments' is empty.
+- Row 637 in 'comments' is empty.
+- Row 642 in 'comments' is empty.
+- Row 647 in 'comments' is empty.
+- Row 652 in 'comments' is empty.
+- Row 657 in 'comments' is empty.
+- Row 662 in 'comments' is empty.
+- Row 667 in 'comments' is empty.
+- Row 672 in 'comments' is empty.
+- Row 677 in 'comments' is empty.
+- Row 682 in 'comments' is empty.
+- Row 687 in 'comments' is empty.
+- Row 692 in 'comments' is empty.
+- Row 697 in 'comments' is empty.
+- Row 702 in 'comments' is empty.
+- Row 707 in 'comments' is empty.
+- Row 712 in 'comments' is empty.
+- Row 717 in 'comments' is empty.
+- Row 722 in 'comments' is empty.
+- Row 727 in 'comments' is empty.
+- Row 732 in 'comments' is empty.
+- Row 737 in 'comments' is empty.
+- Row 742 in 'comments' is empty.
+- Row 747 in 'comments' is empty.
+- Row 752 in 'comments' is empty.
+- Row 757 in 'comments' is empty.
+- Row 762 in 'comments' is empty.
+- Row 767 in 'comments' is empty.
+- Row 772 in 'comments' is empty.
+- Row 777 in 'comments' is empty.
+- Row 782 in 'comments' is empty.
+- Row 787 in 'comments' is empty.
+- Row 792 in 'comments' is empty.
+- Row 797 in 'comments' is empty.
+- Row 802 in 'comments' is empty.
+- Row 807 in 'comments' is empty.
+- Row 812 in 'comments' is empty.
+- Row 817 in 'comments' is empty.
+- Row 822 in 'comments' is empty.
+- Row 827 in 'comments' is empty.
+- Row 832 in 'comments' is empty.
+- Row 837 in 'comments' is empty.
+- Row 842 in 'comments' is empty.
+- Row 847 in 'comments' is empty.
+- Row 852 in 'comments' is empty.
+- Row 857 in 'comments' is empty.
+- Row 862 in 'comments' is empty.
+- Row 867 in 'comments' is empty.
+- Row 872 in 'comments' is empty.
+- Row 877 in 'comments' is empty.
+- Row 882 in 'comments' is empty.
+- Row 887 in 'comments' is empty.
+- Row 892 in 'comments' is empty.
+- Row 897 in 'comments' is empty.
+- Row 902 in 'comments' is empty.
+- Row 907 in 'comments' is empty.
+- Row 912 in 'comments' is empty.
+- Row 917 in 'comments' is empty.
+- Row 922 in 'comments' is empty.
+- Row 927 in 'comments' is empty.
+- Row 932 in 'comments' is empty.
+- Row 937 in 'comments' is empty.
+- Row 942 in 'comments' is empty.
+- Row 947 in 'comments' is empty.
+- Row 952 in 'comments' is empty.
+- Row 957 in 'comments' is empty.
+- Row 962 in 'comments' is empty.
+- Row 967 in 'comments' is empty.
+- Row 972 in 'comments' is empty.
+- Row 977 in 'comments' is empty.
+- Row 982 in 'comments' is empty.
+- Row 987 in 'comments' is empty.
+- Row 992 in 'comments' is empty.
+- Row 997 in 'comments' is empty.
+- 'incident_severity' shows significant drift in category distribution.
+Dataset for 'set2' saved as data_set2.csv
+Generated code snippets saved to results\code_snippets_set2.py
+Error executing code snippets: invalid syntax (<string>, line 1)
+Metrics saved to results\validated_metrics_set2.txt
+Generated rules saved to results\generated_rules_set2.txt
+Validation for 'set2' completed.
+  Feature set 'set2' validated.
+  Generating synthetic data for feature set 'set2'...
+synthetic_response
+```
+total_claim_amount	incident_severity	age	comments
+57285.81	1.0	34.0	NaN
+105506.64	3.0	41.0	This is a sample comment.
+32530.37	0.0	63.0	This is a sample comment.
+82984.94	2.0	35.0	NaN
+40105.62	0.0	24.0	This is a sample comment.
+49744.95	1.0	52.0	This is a sample comment.
+27794.58	0.0	18.0	NaN
+111991.15	3.0	31.0	This is a sample comment.
+47194.98	1.0	37.0	NaN
+73279.80	2.0	40.0	NaN
+107069.63	3.0	19.0	This is a sample comment.
+54406.10	1.0	34.0	NaN
+38561.14	0.0	58.0	NaN
+73628.49	2.0	42.0	This is a sample comment.
+52788.50	1.0	21.0	NaN
+80455.41	2.0	43.0	NaN
+84616.91	2.0	30.0	This is a sample comment.
+49541.47	1.0	50.0	NaN
+104603.49	3.0	44.0	This is a sample comment.
+79162.28	2.0	50.0	NaN
+55009.38	1.0	45.0	NaN
+44594.96	0.0	23.0	NaN
+97966.05	3.0	42.0	NaN
+37977.24	0.0	43.0	NaN
+81011.03	2.0	37.0	This is a sample comment.
+43888.29	0.0	27.0	NaN
+50881.19	1.0	31.0	NaN
+82078.72	2.0	45.0	NaN
+94449.72	3.0	29.0	This is a sample comment.
+43479.49	0.0	37.0	This is a sample comment.
+56356.16	1.0	33.0	NaN
+88757.87	2.0	30.0	This is a sample comment.
+29308.83	0.0	50.0	NaN
+75747.70	2.0	50.0	NaN
+109739.32	3.0	39.0	NaN
+37231.53	0.0	20.0	NaN
+83595.82	2.0	38.0	NaN
+31304.15	0.0	22.0	NaN
+50009.06	1.0	39.0	This is a sample comment.
+90547.36	3.0	39.0	This is a sample comment.
+48840.56	1.0	47.0	NaN
+42548.72	0.0	25.0	NaN
+43721.28	0.0	54.0	NaN
+66436.16	1.0	30.0	This is a sample comment.
+112558.46	3.0	36.0	This is a sample comment.
+55266.21	1.0	44.0	NaN
+38348.26	0.0	26.0	NaN
+114762.80	3.0	42.0	This is a sample comment.
+56542.61	1.0	52.0	NaN
+91064.51	3.0	39.0	NaN
+41303.36	0.0	60.0	This is a sample comment.
+58075.19	1.0	35.0	NaN
+44150.32	0.0	42.0	NaN
+42741.14	0.0	64.0	NaN
+109233.50	3.0	43.0	NaN
+88209.19	2.0	44.0	NaN
+35087.41	0.0	59.0	NaN
+61950.10	1.0	32.0	NaN
+76801.34	2.0	31.0	NaN
+46889.37	1.0	53.0	NaN
+99021.11	3.0	38.0	NaN
+46609.75	1.0	44.0	This is a sample comment.
+30080.99	0.0	45.0	NaN
+75386.03	2.0	36.0	NaN
+63636.22	1.0	38.0	NaN
+41332.73	0.0	31.0	NaN
+105720.79	3.0	42.0	This is a sample comment.
+76195.42	2.0	32.0	This is a sample comment.
+59429.96	1.0	42.0	NaN
+44739.20	0.0	53.0	NaN
+43901.84	0.0	47.0	NaN
+70467.22	2.0	47.0	NaN
+74604.08	2.0	49.0	NaN
+50986.45	1.0	23.0	NaN
+60190.00	1.0	37.0	NaN
+39509.27	0.0	46.0	NaN
+46506.39	1.0	54.0	NaN
+53363.72	1.0	43.0	NaN
+86803.87	2.0	33.0	NaN
+62672.41	1.0	40.0	NaN
+73492.20	2.0	41.0	NaN
+57196.19	1.0	41.0	NaN
+103890.93	3.0	41.0	NaN
+42207.76	0.0	32.0	NaN
+84266.54	2.0	40.0	This is a sample comment.
+44043.80	0.0	29.0	NaN
+54455.29	1.0	40.0	NaN
+69450.51	2.0	29.0	NaN
+40756.54	0.0	35.0	NaN
+33787.81	0.0	36.0	NaN
+64978.62	1.0	25.0	This is a sample comment.
+113049.57	3.0	34.0	NaN
+103712.63	3.0	31.0	This is a sample comment.
+96794.23	3.0	37.0	NaN
+31326.86	0.0	38
+Error parsing the synthetic data: name 'd' is not defined
+Saving the synthetic data
+  Synthetic data generated for feature set 'set2'.
+Synthetic Data for set2:
+Empty DataFrame
+Columns: []
+Index: []
+
+Processing feature set 'set3'...
+  Defining metadata...
+  Metadata defined.
+  Generating statistics...
+  Statistics generated.
+  Validating feature set...
+Validating feature set 'set3'...
+Generating validation rules with gemini
+Generated prompt for feature validation:
+Generate a set of comprehensive data validation rules based on the following dataset statistics:
+- 'vehicle_claim' should have values between 70 and 79560.
+- 'property_damage' should have values between 0 and 2.
+- 'incident_hour_of_the_day' should have values between 0 and 23.
+- 'comments' should only contain valid categories based on historical data.
+- 'comments' should be checked for completeness, readability, sentiment, and keyword presence.
+Ensure that the rules cover completeness, consistency, uniqueness, range checks, and any potential outliers. Additionally, provide guidance on detecting feature drift compared to a baseline dataset.
+Fetching response, please wait......
+Generated Validation Rules for set3:
+ **Completeness Rules:**
+
+- All required fields must be populated.
+- 'comments' should be complete and not null.
+
+**Consistency Rules:**
+
+- 'vehicle_claim' and 'property_damage' should be consistent with each other.
+- 'incident_hour_of_the_day' should be consistent with the time of day.
+- 'comments' should be consistent with the nature of the claim.
+
+**Uniqueness Rules:**
+
+- 'incident_id' should be unique.
+
+**Range Checks:**
+
+- 'vehicle_claim' should be between 70 and 79560.
+- 'property_damage' should be between 0 and 2.
+- 'incident_hour_of_the_day' should be between 0 and 23.
+
+**Outlier Detection:**
+
+- Identify values that are significantly higher or lower than the expected range.
+- Monitor extreme values in 'vehicle_claim' and 'property_damage'.
+
+**'Comments' Validation Rules:**
+
+- **Category Validation:** Verify that 'comments' include values from a predefined list of valid categories.
+- **Completeness:** Check if 'comments' are empty or contain insufficient detail.
+- **Readability:** Check for readability score using readability formulas.
+- **Sentiment Analysis:** Determine the sentiment of 'comments' (positive, neutral, or negative).
+- **Keyword Presence:** Identify the presence of specific keywords in 'comments' for relevance.
+
+**Feature Drift Detection:**
+
+- Compare the distribution of features in the current dataset to a baseline dataset.
+- Identify any significant shifts in the mean, variance, or shape of the data.
+- Monitor changes in the distribution of 'comments' over time.

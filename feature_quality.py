@@ -474,7 +474,7 @@ class GenAISyntheticFeatureGenerator:
         # Manually parse the synthetic data
         try:
             # Convert the synthetic data (table-like string) to a list of lines
-            lines = d.strip().split('\n')
+            lines = synthetic_data.strip().split('\n')
 
             # Extract the headers from the first line
             headers = [header.strip() for header in lines[0].split('|') if header.strip()]

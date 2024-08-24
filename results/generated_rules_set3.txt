@@ -1,0 +1,42 @@
+**Completeness**
+
+- All required fields must be populated with valid data.
+- 'vehicle_claim', 'property_damage', and 'incident_hour_of_the_day' should not be null.
+- 'comments' should not be empty.
+
+**Consistency**
+
+- 'vehicle_claim' should match the provided insurance claim amount.
+- 'property_damage' should match the reported level of damage to property.
+- 'incident_hour_of_the_day' should match the time of the incident as recorded in the police report.
+- 'comments' should match the incident summary provided by the claimant.
+
+**Uniqueness**
+
+- Each observation should have a unique identifier.
+
+**Range Checks**
+
+- 'vehicle_claim' should have values between 70 and 79560.
+- 'property_damage' should have values between 0 and 2.
+- 'incident_hour_of_the_day' should have values between 0 and 23.
+
+**Outliers**
+
+- 'vehicle_claim' values outside the range of 70 to 79560 should be flagged for review.
+- 'property_damage' values outside the range of 0 to 2 should be flagged for review.
+- 'incident_hour_of_the_day' values outside the range of 0 to 23 should be flagged for review.
+
+**Comments Validation**
+
+- 'comments' should only contain valid categories based on historical data.
+- 'comments' should be checked for completeness, readability, sentiment, and keyword presence.
+
+**Feature Drift Detection**
+
+- Monitor the following metrics over time to detect feature drift:
+    - Number of missing values
+    - Distribution of values for each field
+    - Frequency of valid categories in 'comments'
+    - Minimum, maximum, and mean values of 'vehicle_claim', 'property_damage', and 'incident_hour_of_the_day'
+- Compare these metrics to a baseline dataset to identify potential shifts in data quality.

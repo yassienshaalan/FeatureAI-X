@@ -1,0 +1,44 @@
+## Data Validation Rules
+
+### Completeness
+
+- Check for null or missing values in all columns.
+
+### Consistency
+
+- Ensure that the following column pairs have the expected relationships:
+    - 'total_claim_amount' and 'incident_severity': More severe incidents typically result in higher claim amounts.
+    - 'age' and 'incident_severity': Younger individuals may be involved in more severe incidents.
+
+### Uniqueness
+
+- Check for duplicate rows based on unique identifiers (e.g., claim ID, patient ID).
+
+### Range Checks
+
+- Validate that values fall within the specified ranges:
+    - 'total_claim_amount': [100, 114920]
+    - 'incident_severity': [0, 3]
+    - 'age': [18, 64]
+
+### Outlier Detection
+
+- Identify potential outliers for 'total_claim_amount' and 'incident_severity' based on statistical measures (e.g., interquartile range).
+
+### Category Validation for 'comments'
+
+- Create a controlled vocabulary based on historical data to validate categories in the 'comments' column.
+- Check for misspelled or invalid categories.
+
+### Text Quality Validation for 'comments'
+
+- Assess completeness: Check for comments with minimal or no content.
+- Evaluate readability: Use metrics like Flesch-Kincaid Grade Level to ensure comments are understandable.
+- Analyze sentiment: Identify comments expressing positive, negative, or neutral sentiment.
+- Search for keywords: Extract relevant keywords from comments to understand key themes.
+
+## Feature Drift Detection
+
+- Establish a baseline dataset with known characteristics.
+- Periodically compare the current dataset with the baseline using statistical tests (e.g., t-test, chi-square test) to detect changes in data distribution.
+- Monitor changes in key variables (e.g., 'total_claim_amount', 'incident_severity') and text features ('comments') to identify potential drifts.
