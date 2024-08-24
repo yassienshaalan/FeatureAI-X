@@ -1,0 +1,34 @@
+# Data manipulation and analysis
+pandas==2.0.3
+
+# Operating system interface
+os-sys==2.1.4
+
+# Machine Learning and Preprocessing
+scikit-learn==1.3.0
+
+# Statistical Analysis
+scipy==1.11.2
+
+# Language Detection
+langdetect==1.0.9
+
+# LangChain for LLMs and prompt management
+langchain==0.101.0
+langchain-community==0.0.1
+
+# Hugging Face Transformers for GPT-2
+transformers==4.30.0
+
+# PyTorch (for working with Hugging Face Transformers)
+torch==2.0.1
+
+# Numerical Computation
+numpy==1.25.2
+
+# Keras for Neural Networks
+keras==2.13.1
+tensorflow==2.13.0  # Ensure TensorFlow is included, as Keras is often used with TensorFlow backend
+
+# Optional: Other useful packages for compatibility
+matplotlib==3.7.2  # Visualization (useful for debugging, optional)
