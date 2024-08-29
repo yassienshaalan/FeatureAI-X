@@ -30,5 +30,14 @@ numpy==1.25.2
 keras==2.13.1
 tensorflow==2.13.0  # Ensure TensorFlow is included, as Keras is often used with TensorFlow backend
 
+# Google Generative AI
+google-generativeai==0.1.0  # Assuming the version, update if necessary
+
+# Logging
+logging  # Included in standard library, no need to specify in requirements.txt
+
+# Datetime management
+datetime  # Included in standard library, no need to specify in requirements.txt
+
 # Optional: Other useful packages for compatibility
 matplotlib==3.7.2  # Visualization (useful for debugging, optional)
