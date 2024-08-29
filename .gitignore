@@ -1,0 +1,7 @@
+.venv
+.env
+.vs
+.vscode
+logs/
+results/
+

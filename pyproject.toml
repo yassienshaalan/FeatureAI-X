@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "featureai-x"
+version = "0.1.0"
+description = ""
+authors = ["Yassien Shaalan <yassien@gmail.com>"] #, "Aaron Deakin <aarondigital@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+pandas = "2.0.3"
+scikit-learn = "1.3.0"
+scipy = "1.11.2"
+langdetect = "1.0.9"
+langchain = "0.1.7"
+langchain-community = "0.0.20"
+transformers = "4.30.0"
+torch = "2.0.1"
+numpy = "1.24.3"
+keras = "2.13.1"
+tensorflow = "2.13.0"
+tensorflow-io-gcs-filesystem  = "0.31.0"
+tensorflow-intel = "2.13.0"
+google-generativeai = "0.7.2"
+google-api-python-client = "2.143.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
