@@ -1,0 +1,8 @@
+pyspark==3.4.2
+py4j
+pandas
+pyarrow
+numpy
+grpcio
+grpcio-status
+googleapis-common-protos

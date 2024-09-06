@@ -1,0 +1,7 @@
+automation/logs/spark--org.apache*
+automation/logs/spark-*.out
+automation/logs/eventlog/app*
+.env
+.venv/
+data/spark-warehouse/
+automation/spark-conf/*.template
