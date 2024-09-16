@@ -7,13 +7,14 @@ from datetime import datetime
 class ValidationRuleGenerator:
     """
     This class is responsible for generating data validation rules dynamically 
-    based on metadata and statistics.
+    based on metadata and statistics. It retrieves previously created rules 
+    from the knowledge base and only updates or creates new rules if needed.
     """
-
-    def __init__(self, api_key):
+    def __init__(self, api_key, kb_interface):
         self.api_key = api_key
         genai.configure(api_key=self.api_key)
         self.model = genai.GenerativeModel('gemini-pro')
+        self.kb_interface = kb_interface
 
     def generate_prompt_from_metadata(self, metadata, stats):
         """
@@ -37,13 +38,22 @@ class ValidationRuleGenerator:
         prompt += "Ensure that the rules cover completeness, consistency, uniqueness, range checks, and any potential outliers."
         return prompt
 
-    def generate_validation_rules(self, metadata, stats):
+    def generate_validation_rules(self, metadata, stats, set_name):
         """
         Generates the validation rules using the GenAI model based on the metadata and statistics.
+        Retrieves previously generated rules if they exist, only updating if necessary.
         """
+        existing_rules = self.kb_interface.load_rules_from_kb(set_name)
+        if existing_rules:
+            print(f"Using existing validation rules for '{set_name}'.")
+            return existing_rules
+        
         prompt = self.generate_prompt_from_metadata(metadata, stats)
         print(f"Generated prompt for feature validation:\n{prompt}")
         rules = self.generate_response(text=prompt)
+        
+        # Save the newly generated rules in the knowledge base
+        self.kb_interface.save_rules_to_kb(set_name, rules)
         return rules
 
     def generate_response(self, text: str):
@@ -65,24 +75,34 @@ class FeatureSetValidator:
     and stores validation results for easy integration with a knowledge base.
     """
 
-    def __init__(self):
-        self.rule_generator = ValidationRuleGenerator(api_key=os.getenv('GOOGLE_API_KEY'))
+    def __init__(self, kb_interface):
+        self.rule_generator = ValidationRuleGenerator(api_key=os.getenv('GOOGLE_API_KEY'), kb_interface=kb_interface)
+        self.kb_interface = kb_interface
 
     def validate_feature_set(self, set_name, feature_set):
         """
         Validates a feature set, applies the validation rules, and stores the results.
+        Checks with the knowledge base before generating new validation rules.
         """
         print(f"Validating feature set '{set_name}'...")
 
-        # Step 1: Define Metadata
+        # Step 1: Check if validation rules already exist in the knowledge base
+        if self.kb_interface.check_existing_rules(set_name):
+            print(f"Skipping validation rule generation for '{set_name}' as they already exist in the knowledge base.")
+            return
+
+        # Step 2: Define Metadata
         metadata = self.define_metadata(feature_set)
         stats = feature_set.describe(include='all').T
 
-        # Step 2: Generate Validation Rules
-        rules = self.rule_generator.generate_validation_rules(metadata=metadata, stats=stats)
+        # Step 3: Generate Validation Rules
+        rules = self.rule_generator.generate_validation_rules(metadata=metadata, stats=stats, set_name=set_name)
         print(f"Generated Validation Rules for {set_name}:\n{rules}")
 
-        # Step 3: Custom Validation Issues
+        # Save the validation rules using centralized logic
+        self.kb_interface.save_rules_to_kb(set_name, rules)
+
+        # Step 4: Custom Validation Issues
         issues = self.dynamic_custom_rules(feature_set)
 
         if issues:
@@ -94,8 +114,8 @@ class FeatureSetValidator:
             print(f"No data quality issues found in {set_name}.")
             self.write_feature_quality_to_table(set_name, ["No issues found"])
 
-        # Step 4: Save Validation Metrics and Rules
-        self.save_generated_rules(rules, set_name)
+        # Step 5: Save Validation Metrics and Results
+        self.kb_interface.save_validation_results(set_name, rules)
         print(f"Validation for '{set_name}' completed.")
 
     def define_metadata(self, df):
@@ -112,41 +132,110 @@ class FeatureSetValidator:
 
     def dynamic_custom_rules(self, df):
         """
-        Applies dynamic custom rules to validate the dataset, such as checking for suspicious values.
+        Applies dynamic custom rules to validate the dataset.
+        These rules include:
+        - Outlier detection using z-scores for numeric columns
+        - Validation of relationships between numeric columns
+        - Detecting anomalies in categorical or text data
+        - Logical checks for date columns
+        - General statistical validations for completeness and consistency
         """
         custom_issues = []
-        # Example: check if any column exceeds a threshold or has suspicious values
-        if 'age' in df.columns and df['age'].max() > 100:
-            custom_issues.append(f"Age column has values greater than 100.")
+
+        # 1. Check for outliers using z-scores for numeric columns
+        for column in df.select_dtypes(include=['number']).columns:
+            mean_value = df[column].mean()
+            std_dev = df[column].std()
+            if std_dev > 0:
+                z_scores = (df[column] - mean_value) / std_dev
+                outliers = df[abs(z_scores) > 3]
+                if not outliers.empty:
+                    custom_issues.append(f"Column '{column}' contains outliers based on z-score (> 3).")
+
+        # 2. Correlation check between numeric columns
+        numeric_columns = df.select_dtypes(include=['number']).columns
+        if len(numeric_columns) > 1:
+            correlation_matrix = df[numeric_columns].corr()
+            for col1 in numeric_columns:
+                for col2 in numeric_columns:
+                    if col1 != col2 and correlation_matrix.loc[col1, col2] < 0.1:
+                        custom_issues.append(f"Columns '{col1}' and '{col2}' have a low correlation, which may indicate data quality issues.")
+        
+        # 3. Completeness and uniqueness checks for categorical columns
+        for column in df.select_dtypes(include=['category', 'object']).columns:
+            if df[column].isnull().sum() > 0:
+                custom_issues.append(f"Column '{column}' has missing values.")
+            if df[column].nunique() == df.shape[0]:
+                custom_issues.append(f"Column '{column}' should not be unique for every row, which may indicate a data entry issue.")
+
+        # 4. Text column validation: Ensure text is not empty or unusually short
+        for column in df.select_dtypes(include=['object']).columns:
+            for idx, value in df[column].items():
+                if isinstance(value, str):  # Check if the value is a string
+                    if len(value.strip()) == 0:
+                        custom_issues.append(f"Row {idx} in column '{column}' is empty.")
+                    elif len(value) < 5:  # Threshold can be adjusted
+                        custom_issues.append(f"Row {idx} in column '{column}' contains unusually short text (less than 5 characters).")
+                elif pd.isna(value):
+                    custom_issues.append(f"Row {idx} in column '{column}' contains NaN or missing text.")
+
+        # 5. Logical checks for date columns: Ensure dates are valid and follow logical order
+        for column in df.select_dtypes(include=['datetime']).columns:
+            if df[column].max() > pd.Timestamp.now():
+                custom_issues.append(f"Column '{column}' contains future dates, which may indicate data entry errors.")
+            if df[column].isnull().sum() > 0:
+                custom_issues.append(f"Column '{column}' has missing date values.")
+        
+        # 6. General completeness check for all columns
+        for column in df.columns:
+            missing_values = df[column].isnull().sum()
+            if missing_values > 0:
+                custom_issues.append(f"Column '{column}' contains {missing_values} missing values.")
+        
         return custom_issues
+
+
+    
 
     def write_feature_quality_to_table(self, feature_name, issues):
         """
         Writes feature quality issues to a table or file for easy reference.
+        Additionally, logs the number of issues and other relevant metrics.
+        Each file is appended with the current date to differentiate multiple runs.
         """
-        if not os.path.exists('feature_quality_table.csv'):
-            with open('feature_quality_table.csv', 'w') as f:
-                f.write('Feature,Issues\n')
-        with open('feature_quality_table.csv', 'a') as f:
-            for issue in issues:
-                f.write(f"{feature_name},{issue}\n")
-        print(f"Feature quality issues for '{feature_name}' saved to table.")
-
-    def save_generated_rules(self, rules, set_name):
-        """
-        Saves the generated validation rules to a file for easy sharing or inclusion in a knowledge base.
-        """
+        # Get current date in the format 'YYYY-MM-DD'
+        current_date = datetime.now().strftime('%Y-%m-%d')
         
-
-        results_dir = os.path.join('results')
+        # Ensure the results directory exists
+        results_dir = 'metrics'
         if not os.path.exists(results_dir):
             os.makedirs(results_dir)
-
-        rules_filename = os.path.join(results_dir, f'generated_rules_{set_name}.txt')
-
-        with open(rules_filename, 'w', encoding="utf-8") as file:
-            file.write(rules)
-        print(f"Generated rules for '{set_name}' saved to {rules_filename}")
+        
+        # Prepare file paths with the current date
+        quality_file = os.path.join(results_dir, f'feature_quality_table_{feature_name}_{current_date}.csv')
+        metrics_file = os.path.join(results_dir, f'feature_quality_metrics_{feature_name}_{current_date}.csv')
+        
+        # Collect metrics
+        num_issues = len(issues)
+        affected_columns = len(set([issue.split()[0] for issue in issues]))  # Unique feature names affected
+        
+        # Write detailed issues to CSV file
+        with open(quality_file, 'a') as f:
+            if os.path.getsize(quality_file) == 0:  # If the file is empty, write header
+                f.write('Feature,Issue,Severity\n')
+            for issue in issues:
+                # Assign a basic severity level (this could be extended based on logic)
+                severity = "High" if "missing" in issue.lower() or "outliers" in issue.lower() else "Medium"
+                f.write(f"{feature_name},{issue},{severity}\n")
+        
+        # Write metrics summary to a separate CSV
+        with open(metrics_file, 'a') as mf:
+            if os.path.getsize(metrics_file) == 0:  # If the file is empty, write header
+                mf.write('Feature,Num Issues,Affected Columns,Date\n')
+            mf.write(f"{feature_name},{num_issues},{affected_columns},{current_date}\n")
+        
+        print(f"Feature quality issues for '{feature_name}' saved to {quality_file}.")
+        print(f"Feature quality metrics for '{feature_name}' saved to {metrics_file}.")
 
 
 class KnowledgeBaseInterface:
@@ -159,6 +248,18 @@ class KnowledgeBaseInterface:
         if not os.path.exists(self.kb_directory):
             os.makedirs(self.kb_directory)
 
+    def check_existing_rules(self, set_name):
+        """Check if validation rules for the given set_name already exist in the knowledge base."""
+        rules_dir = os.path.join('results', 'generated_rules')
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        rules_filename = os.path.join(rules_dir, f'validation_rules_{set_name}_{current_date}.txt')
+
+        # Check if the file exists
+        if os.path.exists(rules_filename):
+            print(f"Validation rules for '{set_name}' already exist in the knowledge base: {rules_filename}")
+            return True
+        return False
+    
     def save_rules_to_kb(self, set_name, rules):
         """Saves generated validation rules to the knowledge base (a simple file for now)."""
         # Ensure the 'generated_rules' directory exists inside 'results'
@@ -166,8 +267,11 @@ class KnowledgeBaseInterface:
         if not os.path.exists(rules_dir):
             os.makedirs(rules_dir)
 
+        # Prepare file name with current date for uniqueness
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        rules_filename = os.path.join(rules_dir, f'validation_rules_{set_name}_{current_date}.txt')
+
         # Save the rules in the generated_rules directory
-        rules_filename = os.path.join(rules_dir, f'validation_rules_{set_name}.txt')
         with open(rules_filename, 'w') as file:
             file.write(rules)
         print(f"Validation rules for {set_name} saved to {rules_filename}")
@@ -177,36 +281,50 @@ class KnowledgeBaseInterface:
         results_dir = os.path.join('results')
         if not os.path.exists(results_dir):
             os.makedirs(results_dir)
-        
-        result_filename = os.path.join(results_dir, f'validation_results_{set_name}.txt')
+
+        # Prepare file name with current date for uniqueness
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        result_filename = os.path.join(results_dir, f'validation_results_{set_name}_{current_date}.txt')
+
         with open(result_filename, 'w') as file:
             file.write(results)
         print(f"Validation results for {set_name} saved to {result_filename}")
 
+    def load_rules_from_kb(self, set_name):
+        """Loads previously saved rules from the knowledge base."""
+        rules_filename = os.path.join('results', 'generated_rules', f'validation_rules_{set_name}.txt')
+        if os.path.exists(rules_filename):
+            with open(rules_filename, 'r') as file:
+                return file.read()
+        return None
+
 
 def load_new_feature_set():
-        
-        file_path = os.path.join('..', 'data', 'insurance_claims_report.csv')
-        df = pd.read_csv(file_path)
-        print(f"Read {len(df)} records")
-        print("Columns after loading:", df.columns.tolist())
-        
-        return df
+    file_path = os.path.join('..', 'data', 'insurance_claims_report.csv')
+    df = pd.read_csv(file_path)
+    print(f"Read {len(df)} records")
+    print("Columns after loading:", df.columns.tolist())
+    
+    # Extract dataset name from file path
+    dataset_name = os.path.basename(file_path).split('.')[0]  
+    
+    return df, dataset_name
+
 
 if __name__ == "__main__":
     # Sample Data
-    sample_data = load_new_feature_set()
+    sample_data, dataset_name = load_new_feature_set()  
 
     # Instantiate the validator and knowledge base interface
-    validator = FeatureSetValidator()
     knowledge_base = KnowledgeBaseInterface()
+    validator = FeatureSetValidator(kb_interface=knowledge_base)
 
     # Validate the feature set
-    set_name = 'customer_data'
-    validator.validate_feature_set(set_name, sample_data)
+    validator.validate_feature_set(dataset_name, sample_data)
 
     # Save validation rules and results to the knowledge base
-    validation_rules = "Sample validation rules for customer_data"
-    validation_results = "Sample validation results: Age column has values greater than 100."
-    knowledge_base.save_rules_to_kb(set_name, validation_rules)
-    knowledge_base.save_validation_results(set_name, validation_results)
+    validation_rules = f"Sample validation rules for {dataset_name}"
+    validation_results = f"Sample validation results: Age column has values greater than 100."
+    knowledge_base.save_rules_to_kb(dataset_name, validation_rules)
+    knowledge_base.save_validation_results(dataset_name, validation_results)
+
