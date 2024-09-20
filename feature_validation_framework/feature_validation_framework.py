@@ -3,6 +3,7 @@ import pandas as pd
 import logging
 import google.generativeai as genai
 from datetime import datetime
+import mlflow
 
 class ValidationRuleGenerator:
     """
@@ -10,12 +11,23 @@ class ValidationRuleGenerator:
     based on metadata and statistics. It retrieves previously created rules 
     from the knowledge base and only updates or creates new rules if needed.
     """
-    def __init__(self, api_key, kb_interface):
+    
+    def __init__(self, api_key=None, kb_interface=None, model_choice="gemini"):
         self.api_key = api_key
-        genai.configure(api_key=self.api_key)
-        self.model = genai.GenerativeModel('gemini-pro')
         self.kb_interface = kb_interface
-
+        self.model_choice = model_choice
+        self.model = None
+        
+        if self.model_choice == "gemini":
+            # Configure Gemini AI
+            genai.configure(api_key=self.api_key)
+            self.model = genai.GenerativeModel('gemini-pro')
+        elif self.model_choice == "llama" or self.model_choice == "mistral":
+            # Configure Mistral/Llama using MLflow
+            client = mlflow.tracking.MlflowClient()
+            model_version = client.get_model_version('system.ai.mistral_7b_v0_1', version=2)
+            self.model = mlflow.pyfunc.load_model("models:/system.ai.mistral_7b_v0_1/2")
+        
     def generate_prompt_from_metadata(self, metadata, stats):
         """
         Generates a validation prompt based on the metadata and statistics of the dataset.
@@ -40,7 +52,7 @@ class ValidationRuleGenerator:
 
     def generate_validation_rules(self, metadata, stats, set_name):
         """
-        Generates the validation rules using the GenAI model based on the metadata and statistics.
+        Generates the validation rules using the selected AI model based on the metadata and statistics.
         Retrieves previously generated rules if they exist, only updating if necessary.
         """
         existing_rules = self.kb_interface.load_rules_from_kb(set_name)
@@ -58,16 +70,37 @@ class ValidationRuleGenerator:
 
     def generate_response(self, text: str):
         """
-        Sends the prompt to the Generative AI model and retrieves the response (rules).
+        Sends the prompt to the selected AI model and retrieves the response (rules).
         """
-        print("Fetching response from GenAI, please wait...")
-        response = self.model.generate_content(text)
-        if response and response.text:
-            return response.text
-        else:
-            logging.warning("Gemini response was empty or blocked. Check safety ratings.")
-            return None
+        if self.model_choice == "gemini":
+            print("Fetching response from Gemini AI, please wait...")
+            response = self.model.generate_content(text)
+            if response and response.text:
+                return response.text
+            else:
+                logging.warning("Gemini response was empty or blocked. Check safety ratings.")
+                return None
+        elif self.model_choice in ["llama", "mistral"]:
+            print("Fetching response from Llama/Mistral AI, please wait...")
+            response = self.model.predict(text)  # Llama/Mistral model's API call
+            if response:
+                return response
+            else:
+                logging.warning("Llama/Mistral response was empty or blocked.")
+                return None
 
+    def generate_code_snippets_with_genai(self, rules,set_name):
+        # Generate a prompt that asks the AI to create Python code based on the rules
+        #prompt = f"Generate Python code to validate the following data based on these rules:\n{rules}\n"
+        prompt = f"""
+        Based on the following data validation rules, generate Python code to implement these rules for a pandas DataFrame named 'feature_set':
+
+        {rules}
+
+        The code should perform the necessary checks and save the validation outcomes, including all relevant metrics, to a CSV file named 'validation_results_{set_name}.csv'.
+        """
+        code_snippets = self.model.generate_content(prompt).text
+        return code_snippets
 
 class FeatureSetValidator:
     """
@@ -79,10 +112,54 @@ class FeatureSetValidator:
         self.rule_generator = ValidationRuleGenerator(api_key=os.getenv('GOOGLE_API_KEY'), kb_interface=kb_interface)
         self.kb_interface = kb_interface
 
-    def validate_feature_set(self, set_name, feature_set):
+    
+    def save_and_execute_code_snippets(self, code_snippets, set_name, feature_set):
+
+        # Strip out the markdown code block markers
+        if code_snippets.startswith("```python"):
+            code_snippets = code_snippets[len("```python"):].strip()
+        if code_snippets.endswith("```"):
+            code_snippets = code_snippets[:-len("```")].strip()
+
+         # Define the dataset file name
+        orig_dataset_filename = f'{set_name}.csv'
+        print("orig_dataset_filename",orig_dataset_filename)
+        # Save the dataset to a CSV file
+        dataset_filename = os.path.join("results", orig_dataset_filename)
+        feature_set.to_csv(dataset_filename, index=False)
+        print(f"Dataset for '{set_name}' saved as {dataset_filename}")
+        
+        # Replace the dataset reference in code snippets (if necessary)
+        print("code_snippets",code_snippets)
+        code_snippets = code_snippets.replace('feature_set.csv', f'{orig_dataset_filename}')
+        # Save the code snippets to a file
+        code_snippet_filename = os.path.join('results', f'code_snippets_{set_name}.py')
+        print("code_snippet_filename")
+        print(code_snippet_filename)
+        with open(code_snippet_filename, 'w', encoding="utf-8") as file:
+            file.write(code_snippets)
+
+        print(f"Generated code snippets saved to {code_snippet_filename}")
+
+        # Execute the saved code snippets
+        local_vars = {}
+        try:
+            exec(code_snippets, {}, local_vars)  # Execute the code snippets and capture local variables
+        except Exception as e:
+            print(f"Error executing code snippets: {e}")
+            return {}
+
+        validation_outcomes = local_vars.get('validation_outcomes', {})
+        print(f"Validation outcomes for '{set_name}': {validation_outcomes}")
+
+        return validation_outcomes
+
+
+    def validate_feature_set(self, set_name, feature_set, baseline_df=None, save=0):
         """
-        Validates a feature set, applies the validation rules, and stores the results.
-        Checks with the knowledge base before generating new validation rules.
+        Validates a feature set, applies the validation rules, generates Python code, 
+        executes the code, and stores the results. Checks with the knowledge base 
+        before generating new validation rules.
         """
         print(f"Validating feature set '{set_name}'...")
 
@@ -110,13 +187,51 @@ class FeatureSetValidator:
             for issue in issues:
                 print(f"- {issue}")
             self.write_feature_quality_to_table(set_name, issues)
+
+            # Generate Python code snippets based on the generated rules
+            code_snippets = self.rule_generator.generate_code_snippets_with_genai(rules,"feature_set.csv")
+            print(f"Generated Python code for validation:\n{code_snippets}")
+
+            # Save and execute the generated code snippets
+            validation_outcomes = self.save_and_execute_code_snippets(code_snippets, set_name, feature_set)
+
+            # Merge validation outcomes into metrics
+            metrics = {
+                'total_features': len(feature_set.columns),
+                'missing_values': feature_set.isnull().sum().sum(),
+                'validation_outcomes': validation_outcomes
+            }
         else:
             print(f"No data quality issues found in {set_name}.")
             self.write_feature_quality_to_table(set_name, ["No issues found"])
 
+            metrics = {
+                'total_features': len(feature_set.columns),
+                'missing_values': feature_set.isnull().sum().sum(),
+                'validation_outcomes': "No issues found"
+            }
+
         # Step 5: Save Validation Metrics and Results
-        self.kb_interface.save_validation_results(set_name, rules)
+        self.save_metrics(metrics, set_name=set_name)
+
+        # Save the generated rules
+        self.save_generated_rules(rules, set_name=set_name)
+
         print(f"Validation for '{set_name}' completed.")
+    def save_metrics(self, metrics, set_name):
+        # Save the metrics to a file
+        metrics_filename = os.path.join('results', f'validated_metrics_{set_name}.txt')
+        with open(metrics_filename, 'w', encoding="utf-8") as file:
+            for key, value in metrics.items():
+                file.write(f"{key}: {value}\n")
+
+        print(f"Metrics saved to {metrics_filename}")
+
+    def save_generated_rules(self, rules, set_name):
+        # Save the generated rules to a file
+        rules_filename = os.path.join('results', f'generated_rules_{set_name}.txt')
+        with open(rules_filename, 'w', encoding="utf-8") as file:
+            file.write(rules)
 
     def define_metadata(self, df):
         """
@@ -193,9 +308,6 @@ class FeatureSetValidator:
                 custom_issues.append(f"Column '{column}' contains {missing_values} missing values.")
         
         return custom_issues
-
-
-    
 
     def write_feature_quality_to_table(self, feature_name, issues):
         """
@@ -276,19 +388,20 @@ class KnowledgeBaseInterface:
             file.write(rules)
         print(f"Validation rules for {set_name} saved to {rules_filename}")
 
-    def save_validation_results(self, set_name, results):
+    def save_validation_results(self, set_name, results, save=0):
         """Saves validation results to the knowledge base."""
-        results_dir = os.path.join('results')
-        if not os.path.exists(results_dir):
-            os.makedirs(results_dir)
+        if save == 1:
+            results_dir = os.path.join('results')
+            if not os.path.exists(results_dir):
+                os.makedirs(results_dir)
 
-        # Prepare file name with current date for uniqueness
-        current_date = datetime.now().strftime('%Y-%m-%d')
-        result_filename = os.path.join(results_dir, f'validation_results_{set_name}_{current_date}.txt')
+            # Prepare file name with current date for uniqueness
+            current_date = datetime.now().strftime('%Y-%m-%d')
+            result_filename = os.path.join(results_dir, f'validation_results_{set_name}_{current_date}.txt')
 
-        with open(result_filename, 'w') as file:
-            file.write(results)
-        print(f"Validation results for {set_name} saved to {result_filename}")
+            with open(result_filename, 'w') as file:
+                file.write(results)
+            print(f"Validation results for {set_name} saved to {result_filename}")
 
     def load_rules_from_kb(self, set_name):
         """Loads previously saved rules from the knowledge base."""
@@ -313,11 +426,21 @@ def load_new_feature_set():
 
 if __name__ == "__main__":
     # Sample Data
-    sample_data, dataset_name = load_new_feature_set()  
+    sample_data, dataset_name = load_new_feature_set()
+
+    # Ask user to choose the AI model (Gemini or Mistral/Llama)
+    model_choice = "gemini"  # Choose between "gemini" or "mistral"
 
     # Instantiate the validator and knowledge base interface
     knowledge_base = KnowledgeBaseInterface()
     validator = FeatureSetValidator(kb_interface=knowledge_base)
+
+    # Configure rule generator with chosen model
+    validator.rule_generator = ValidationRuleGenerator(
+        api_key=os.getenv('GOOGLE_API_KEY'),
+        kb_interface=knowledge_base,
+        model_choice=model_choice
+    )
 
     # Validate the feature set
     validator.validate_feature_set(dataset_name, sample_data)
@@ -327,4 +450,3 @@ if __name__ == "__main__":
     validation_results = f"Sample validation results: Age column has values greater than 100."
     knowledge_base.save_rules_to_kb(dataset_name, validation_rules)
     knowledge_base.save_validation_results(dataset_name, validation_results)
-
