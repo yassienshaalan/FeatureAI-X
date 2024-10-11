@@ -14,10 +14,47 @@ import os
 import sqlite3
 import logging
 from datetime import datetime
+import sys
+import subprocess
 
+class Logger(object):
+    def __init__(self, log_filename):
+        self.terminal = sys.stdout
+        self.log = open(log_filename, "a", encoding="utf-8")  
 
-logging.basicConfig(filename='knowledge_base.log', level=logging.INFO, 
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        pass  
+
+def create_directories():
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+    if not os.path.exists('results'):
+        os.makedirs('results')
+
+def setup_logging():
+
+    create_directories()
+    # Generate the log filename with time and run number
+    now = datetime.now()
+    date_str = now.strftime("%Y-%m-%d_%H-%M-%S")
+    log_filename = os.path.join('logs', f'log_{date_str}.log')
+
+    # Set up logging to both console and file
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_filename),
+            logging.StreamHandler()  # This logs to console
+        ]
+    )
+    logging.info("Logging setup complete.")
+    # Redirect print statements to log file as well
+    sys.stdout = Logger(log_filename)
 
 class ValidationRuleGenerator:
     def __init__(self, generative_model, kb_interface):
@@ -29,10 +66,10 @@ class ValidationRuleGenerator:
         if existing_rules:
             print(f"Using existing validation rules for '{set_name}'.")
             return existing_rules
-        
+        print("Generating new rules as no existing was found")
         prompt = self.generate_prompt_from_metadata(metadata, stats)
         rules = self.generative_model.generate(prompt)
-        self.kb_interface.save_rules_to_kb(set_name, rules)
+        self.kb_interface.store(set_name, rules)
         return rules
 
     def generate_prompt_from_metadata(self, metadata, stats):
@@ -46,7 +83,7 @@ class ValidationRuleGenerator:
                 prompt += f"- '{column}' should have values between {int(stats.loc[column, 'min'])} and {int(stats.loc[column, 'max'])}.\n"
                 if stats.loc[column, 'min'] < 0:
                     prompt += f"- '{column}' should not have negative values.\n"
-            elif pd.api.types.is_categorical_dtype(dtype) or pd.api.types.is_object_dtype(dtype):
+            elif isinstance(dtype, pd.CategoricalDtype) or pd.api.types.is_object_dtype(dtype):
                 prompt += f"- '{column}' should only contain valid categories based on historical data.\n"
                 if metadata['unique_counts'][column] == metadata['num_rows']:
                     prompt += f"- '{column}' should be unique.\n"
@@ -55,8 +92,10 @@ class ValidationRuleGenerator:
             if pd.api.types.is_string_dtype(dtype):
                 prompt += f"- '{column}' should be checked for completeness, readability, and keyword presence.\n"
         prompt += "Ensure that the rules cover completeness, consistency, uniqueness, range checks, and any potential outliers."
+        
         return prompt
-
+    
+    '''
     def generate_validation_rules(self, metadata, stats, set_name):
         """
         Generates the validation rules using the selected AI model based on the metadata and statistics.
@@ -74,7 +113,7 @@ class ValidationRuleGenerator:
         # Save the newly generated rules in the knowledge base
         self.kb_interface.save_rules_to_kb(set_name, rules)
         return rules
-
+    '''
     def generate_response(self, text: str):
         """
         Sends the prompt to the selected AI model and retrieves the response (rules).
@@ -125,33 +164,75 @@ class FeatureSetValidator:
         self.rule_generator = rule_generator
         self.code_generator = code_generator
 
+    def save_validated_outcome(self,validation_outcomes,set_name):
+        results_dir = os.path.join(os.getcwd(), "results")  # Path to the results directory
+        os.makedirs(results_dir, exist_ok=True)  # Ensure the results directory exists
+        # Save validation outcomes to CSV
+        validation_outcome_filename = os.path.join(results_dir, f'{set_name}_validation_outcomes.csv')
+        
+        try:
+            if validation_outcomes:
+                pd.DataFrame.from_dict(validation_outcomes, orient='index').reset_index().to_csv(validation_outcome_filename, header=["Feature", "Outcome"], index=False)
+                print(f"Validation outcomes saved as {validation_outcome_filename}")
+            else:
+                print("No validation outcomes to save.")
+        except Exception as e:
+            print(f"Error saving validation outcomes: {e}")
+
     def validate_feature_set(self, metadata, stats, set_name, feature_set):
         # Step 1: Generate or retrieve validation rules.
         rules = self.rule_generator.generate_validation_rules(metadata, stats, set_name)
         print(f"Generated Validation Rules for {set_name}:\n{rules}")
         self.save_generated_rules(rules, set_name)
         # Step 2: Generate Python code snippets based on the rules.
-        code_snippets = self.code_generator.generate_code_snippets(rules, set_name)
+        #code_snippets = self.code_generator.generate_code_snippets(rules, set_name)
+        code_snippets = self.code_generator.generate_or_retrieve(rules, set_name)
 
         # Step 3: Execute the generated code snippets within the context of the provided dataset.
-        local_scope = {'feature_set': feature_set, 'validation_outcomes': {}}  # Initialize validation_outcomes
-        try:
-            exec(code_snippets, globals(), local_scope)  # Execute the generated validation code
-        except Exception as e:
-            print(f"Error executing code snippets: {e}")
-            return
-
-        validation_outcomes = local_scope.get('validation_outcomes', 'No validation outcomes defined.')
+        print("Execute the generated code snippets within the context of the provided dataset")
+        validation_outcomes = self.save_and_execute_code_snippets(code_snippets, set_name, feature_set)
         print(f"Validation outcomes for '{set_name}': {validation_outcomes}")
+        self.save_validated_outcome(validation_outcomes,set_name)
+        # Step 4: Custom Validation Issues
+        issues = self.dynamic_custom_rules(feature_set)
 
-        # Step 4: Save validation results and metrics.
-        self.save_validation_results(validation_outcomes, set_name)
-        metrics = {
-            'total_features': len(feature_set.columns),
-            'missing_values': feature_set.isnull().sum().sum(),
-            'validation_outcomes': validation_outcomes
-        }
-        self.save_metrics(metrics, set_name)
+        if issues:
+            print(f"Data Quality Issues Found in {set_name}:")
+            for issue in issues:
+                print(f"- {issue}")
+            self.write_feature_quality_to_table(set_name, issues)
+
+            # Generate Python code snippets based on the generated rules
+            code_snippets = self.code_generator.generate_or_retrieve(rules,set_name+"_dynamic_rules")
+            #print(f"Generated Python code for validation:\n{code_snippets}")
+
+            # Save and execute the generated code snippets
+            validation_outcomes = self.save_and_execute_code_snippets(code_snippets, set_name+"_dynamic_rules", feature_set)
+            self.save_validated_outcome(validation_outcomes,set_name+"_dynamic_rules")
+            # Merge validation outcomes into metrics
+            metrics = {
+                'total_features': len(feature_set.columns),
+                'missing_values': feature_set.isnull().sum().sum(),
+                'validation_outcomes': validation_outcomes
+            }
+        else:
+            print(f"No data quality issues found in {set_name}.")
+            self.write_feature_quality_to_table(set_name, ["No issues found"])
+
+            metrics = {
+                'total_features': len(feature_set.columns),
+                'missing_values': feature_set.isnull().sum().sum(),
+                'validation_outcomes': "No issues found"
+            }
+
+        # Step 5: Save Validation Metrics and Results
+        self.save_metrics(metrics, set_name=set_name)
+
+        # Save the generated rules
+        self.save_generated_rules(rules, set_name=set_name)
+
+        print(f"Validation for '{set_name}' completed.")
+
 
     def save_validation_results(self, validation_outcomes, set_name):
         # Save the validation outcomes to a CSV file
@@ -197,7 +278,7 @@ class FeatureSetValidator:
         print(f"Generated Validation Rules for {set_name}:\n{rules}")
 
         # Save the validation rules using centralized logic
-        self.kb_interface.save_rules_to_kb(set_name, rules)
+        #self.kb_interface.save_rules_to_kb(set_name, rules)
 
         # Step 4: Custom Validation Issues
         issues = self.dynamic_custom_rules(feature_set)
@@ -239,53 +320,118 @@ class FeatureSetValidator:
 
         print(f"Validation for '{set_name}' completed.")
 
+    
     def save_and_execute_code_snippets(self, code_snippets, set_name, feature_set):
+        # If code_snippets is a list, process each snippet individually and remove duplicates
+        if isinstance(code_snippets, list):
+            processed_snippets = []
+            for snippet in code_snippets:
+                snippet = snippet.strip()
 
-        # Strip out the markdown code block markers
-        if code_snippets.startswith("```python"):
-            code_snippets = code_snippets[len("```python"):].strip()
-        if code_snippets.endswith("```"):
-            code_snippets = code_snippets[:-len("```")].strip()
+                # Strip out the markdown code block markers from each snippet
+                if snippet.startswith("```python"):
+                    snippet = snippet[len("```python"):].strip()
+                if snippet.endswith("```"):
+                    snippet = snippet[:-len("```")].strip()
 
-         # Define the dataset file name
+                processed_snippets.append(snippet)
+
+            # Remove duplicates and store snippets as individual parts
+            code_snippets = list(set(processed_snippets))
+
+        # Define the path for the dataset file (relative path)
+        results_dir = os.path.join(os.getcwd(), "results")  # Path to the results directory
+        os.makedirs(results_dir, exist_ok=True)  # Ensure the results directory exists
+
         orig_dataset_filename = f'{set_name}.csv'
-        print("orig_dataset_filename",orig_dataset_filename)
-        # Save the dataset to a CSV file
-        dataset_filename = os.path.join("results", orig_dataset_filename)
-        feature_set.to_csv(dataset_filename, index=False)
-        print(f"Dataset for '{set_name}' saved as {dataset_filename}")
+        dataset_filename = os.path.join(results_dir, orig_dataset_filename)  # Path to the dataset file
+
+        # Get the absolute path for better reliability
+        abs_dataset_filename = os.path.abspath(dataset_filename)
         
-        # Replace the dataset reference in code snippets (if necessary)
-        code_snippets = code_snippets.replace('feature_set.csv', f'{orig_dataset_filename}')
-        # Save the code snippets to a file
-        code_snippet_filename = os.path.join('results', f'code_snippets_{set_name}.py')
-        print("code_snippet_filename")
-        print(code_snippet_filename)
-        with open(code_snippet_filename, 'w', encoding="utf-8") as file:
-            file.write(code_snippets)
-
-        print(f"Generated code snippets saved to {code_snippet_filename}")
-
-        # Execute the saved code snippets
-        local_vars = {}
-        try:
-            exec(code_snippets, {}, local_vars)  # Execute the code snippets and capture local variables
-        except Exception as e:
-            print(f"Error executing code snippets: {e}")
+        # Validate the dataset before saving
+        if feature_set.empty:
+            print("Error: The dataset is empty.")
             return {}
 
-        validation_outcomes = local_vars.get('validation_outcomes', {})
-        print(f"Validation outcomes for '{set_name}': {validation_outcomes}")
+        print(f"Dataset saved as {abs_dataset_filename}")
 
+        # Save the dataset to a CSV file
+        try:
+            feature_set.to_csv(dataset_filename, index=False)
+            print(f"Dataset for '{set_name}' saved as {abs_dataset_filename}")
+        except Exception as e:
+            print(f"Error saving the dataset: {e}")
+            return {}
+
+        validation_outcomes = {}
+
+        # Iterate through the snippets and log any replacements made
+        for i, snippet in enumerate(code_snippets):
+            # Replace references to 'feature_set.csv' with the absolute dataset filename
+            abs_dataset_filename = abs_dataset_filename.replace("\\", "/")  # Replace backslashes with forward slashes
+            snippet = snippet.replace('feature_set.csv', abs_dataset_filename)
+
+            # Log that we are executing a snippet
+            print(f"Executing code snippet part {i+1}...")
+
+            # Debugging: Confirm file paths before execution
+            #print(f"Dataset path: {abs_dataset_filename}")
+            #print(f"Current working directory: {os.getcwd()}")
+            #print(f"Files in results directory: {os.listdir(results_dir)}")
+
+            # Check if the dataset file exists before execution
+            if not os.path.exists(abs_dataset_filename):
+                print(f"Error: The dataset file {abs_dataset_filename} does not exist.")
+                continue
+
+            # Define a file path for each snippet
+            snippet_file_path = os.path.join(results_dir, f"code_snippet_part_{i+1}.py")
+
+            # Write each snippet to its own Python file
+            with open(snippet_file_path, "w") as snippet_file:
+                snippet_file.write(f"# Code snippet part {i+1}\n")
+                snippet_file.write(snippet)
+                snippet_file.write("\n")  # Add a newline at the end for clarity
+
+            # Execute the code snippet in a safe local scope
+            local_vars = {
+                'pd': pd,  # Provide pandas context for code snippets
+                'feature_set': feature_set  # Provide access to the dataset
+            }
+
+            try:
+                exec(snippet, {}, local_vars)  # Execute the current code snippet
+                snippet_outcome = local_vars.get('validation_outcomes', {})
+                validation_outcomes.update(snippet_outcome)  # Aggregate the outcomes
+                print("snippet_outcome",snippet_outcome)
+                print(f"Executed code snippet part {i+1} successfully.")
+
+            except Exception as e:
+                print(f"Error executing code snippet part {i+1}: {e}")
+
+                logging.error(f"Error executing code snippet part {i+1}: {e}")
+                # Instead of stopping, log the error and continue to the next snippet
+                continue
+
+        print(f"Validation outcomes for '{set_name}': {validation_outcomes}")
         return validation_outcomes
-        
+     
     def save_generated_rules(self, rules, set_name):
         # Define the JSON file path
         rules_filename = os.path.join('results', f'generated_rules_{set_name}.json')
 
-        # Write rules to a JSON file
+        rules_dict = {}
+        current_section = None
+        for line in rules.splitlines():
+            if line.startswith("**") and line.endswith("**"):
+                current_section = line.strip("**").strip()  
+                rules_dict[current_section] = []
+            elif current_section:
+                rules_dict[current_section].append(line.strip())
+
         with open(rules_filename, 'w', encoding="utf-8") as file:
-            json.dump(rules, file, indent=4)  # Pretty print the rules
+            json.dump(rules_dict, file, indent=4)  
 
         print(f"Rules saved to {rules_filename}")
 
@@ -538,8 +684,6 @@ class KnowledgeBaseInterface:
             print(f"Loaded validation rules for '{set_name}'.")
         return rules
 
-
-# RAG Validation
 class RAGValidation:
     def __init__(self, knowledge_base, generator):
         self.knowledge_base = knowledge_base
@@ -590,7 +734,6 @@ class DriftManager:
             print("No drift detected.")
             return None, None
 
-
 class DriftDetector:
     """
     This class detects drift by comparing the new dataset with the baseline dataset (historical data).
@@ -609,33 +752,119 @@ class DriftDetector:
         drifted_columns = [col for col, p in p_values.items() if p < threshold]
         return drifted_columns
 
-
 class CodeSnippetGenerator:
     def __init__(self, model):
         self.model = model  # Store the generative model
         self.template_store = {}  # Store generated code snippets for reuse
 
+    
     def generate_or_retrieve(self, validation_rules, feature_set_name):
-        snippets = []
+        snippets = set()  # Use a set to avoid duplicates
+
         for rule in validation_rules:
             if rule in self.template_store:
-                snippets.append(self.template_store[rule])
+                snippets.add(self.template_store[rule])
             else:
                 # Generate a prompt asking the AI to create Python code based on the rules
                 prompt = f"""
-                Based on the following data validation rules, generate Python code to implement these rules for a pandas DataFrame named 'feature_set':
+                        Based on the following data validation rules, generate valid and correct Python code that works to implement these rules for a pandas DataFrame named 'feature_set':
 
-                {rule}
+                        {rule}
 
-                The code should perform the necessary checks and save the validation outcomes, including all relevant metrics, to a CSV file named 'validation_results_{feature_set_name}.csv'.
-                """
+                        Ensure the following:
+                        1. The DataFrame 'feature_set' contains the necessary columns for the validation rules.
+                        2. Handle missing columns or missing files gracefully, **without using exit(). Instead, log the errors into the validation results list**.
+                        3. Perform the necessary checks, and store validation outcomes in a dictionary, including relevant metrics.
+                        4. Ensure that the validation metrics include:
+                        - Count of total features
+                        - Count of missing values per column
+                        - Count of outliers detected
+                        - Any other relevant statistics based on the rules
+                        5. Save the validation results to a CSV file named feature_set_validation_outcomes_{rule.replace(" ", "_").replace(",", "")}.csv.
+                        6. **Ensure all code is within a function (e.g., 'validate_feature_set')**, and there should be no 'return' statements outside functions.
+                        7. The necessary libraries (e.g., pandas, os) must be imported in the code. If 'os' or 'pandas' is not defined, import them.
+                        8. If an error occurs during execution, log the error in the validation results list, and continue execution.
+                        9. **Create a main function to call the validation function and print the outcomes.**
+                        """
+
                 new_snippet = self.model.generate(prompt)
-                print("new_snippet---------------------")
-                print(new_snippet)
-                snippets.append(new_snippet)
-                self.template_store[rule] = new_snippet  # Store for future use
-        return snippets
-    
+
+                # Basic validation of the generated code
+                if 'return' not in new_snippet or 'def ' not in new_snippet:
+                    # Force the function structure and imports if missing
+                    new_snippet = f"""
+                    import pandas as pd
+                    import os
+
+                    def validate_feature_set(feature_set):
+                        validation_results = []
+                        metrics = {{
+                            'total_features': len(feature_set.columns),
+                            'missing_values': {{}} ,
+                            'outliers': {{}} 
+                        }}
+
+                        # Add the generated validation code snippet here
+                        {new_snippet.strip()}  # Strip leading/trailing whitespace
+
+                        # Return the validation results and metrics
+                        validation_results.append(f"Validation Metrics: {{metrics}}")
+                        return validation_results
+                    """
+                snippets.add(new_snippet)
+                self.template_store[rule] = new_snippet  
+
+        # Save validation results from each snippet to CSV files
+        for i, snippet in enumerate(snippets):
+            local_vars = {
+                'pd': pd,
+                'feature_set': feature_set_name,
+            }
+
+            # Generate a unique filename for each snippet based on its rule
+            output_filename = f'results/feature_set_validation_outcomes_{i+1}.csv'
+
+            # Add the output filename to local_vars for use in the snippet
+            local_vars['output_filename'] = output_filename
+            
+            # Prepare a snippet that saves its validation results directly to a CSV file
+            # After defining the function in the full snippet
+            full_snippet = f"""
+            {snippet}
+
+            # Save the validation results to the specified CSV file
+            validation_results_df = pd.DataFrame(validation_results)
+            validation_results_df.to_csv(output_filename, index=False, header=True)
+            """
+
+            try:
+                exec(full_snippet, {}, local_vars)
+                print(f"Executed code snippet part {i+1} successfully. Results saved to {output_filename}.")
+            except Exception as e:
+                # Log error in a dedicated file
+                with open(output_filename, 'a') as f:
+                    f.write(f"Execution Error: {str(e)}\n")
+                print(f"Error executing snippet part {i+1}: {e}")
+
+        # Combine all individual CSV files into one final CSV
+        combined_quality_file = 'feature_set_validation_outcomes_combined.csv'
+        combined_results = []
+
+        for i in range(1, len(snippets) + 1):  # Assuming snippets are sequentially numbered
+            try:
+                temp_df = pd.read_csv(f'feature_set_validation_outcomes_{i}.csv')
+                combined_results.append(temp_df)
+            except FileNotFoundError:
+                print(f"Warning: {f'feature_set_validation_outcomes_{i}.csv'} not found.")
+
+        if combined_results:
+            final_combined_df = pd.concat(combined_results, ignore_index=True)
+            final_combined_df.to_csv(combined_quality_file, index=False)
+            print(f"All results combined into {combined_quality_file}.")
+        else:
+            print("No results to combine.")
+
+        return list(snippets)
 
 class GenerativeModel:
     """
@@ -745,15 +974,68 @@ if __name__ == "__main__":
 def generate_metadata_and_stats(df):
     metadata = {
         'data_types': df.dtypes.apply(lambda dtype: dtype.name).to_dict(),
-        'unique_counts': df.nunique().to_dict()
+        'unique_counts': df.nunique().to_dict(),
+        'num_rows': df.shape[0] 
     }
-    stats = {
-        column: {'min': df[column].min(), 'max': df[column].max()}
-        for column in df.columns if pd.api.types.is_numeric_dtype(df[column])
-    }
+    # Generate descriptive statistics and transpose to match the structure
+    stats = df.describe(include='all').T  
+
     return metadata, stats
 
+def execute_validation_code(code_snippets, feature_set):
+    """
+    Safely executes the generated validation code snippets on the given feature set.
+    Assumes that the snippets will produce validation outcomes.
+    """
+    local_scope = {'feature_set': feature_set}
+    try:
+        # Execute the code snippets
+        exec(code_snippets, globals(), local_scope)
+
+        # Retrieve validation outcomes from the executed code
+        validation_outcomes = local_scope.get('validation_outcomes', 'No validation outcomes defined.')
+        return validation_outcomes
+    except Exception as e:
+        print(f"Error executing validation code: {e}")
+        return None
+
+def save_validation_outcomes(set_name, validation_outcomes):
+    """Saves the validation outcomes to a CSV file."""
+    results_filename = os.path.join('results', f'validation_outcomes_{set_name}.csv')
+    
+    with open(results_filename, mode='w', newline='', encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(['Outcome Description', 'Value'])
+        for key, value in validation_outcomes.items():
+            writer.writerow([key, value])
+
+    print(f"Validation outcomes saved to {results_filename}")
+
+
+def save_feature_metrics(set_name, feature_set):
+    """Saves basic feature set metrics (e.g., missing values, number of rows) to a CSV file."""
+    metrics_filename = os.path.join('results', f'feature_metrics_{set_name}.csv')
+    
+    metrics = {
+        'num_rows': feature_set.shape[0],
+        'num_columns': feature_set.shape[1],
+        'missing_values': feature_set.isnull().sum().sum(),
+        # You can add more feature-specific metrics here if needed
+    }
+    
+    with open(metrics_filename, mode='w', newline='', encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(['Metric', 'Value'])
+        for key, value in metrics.items():
+            writer.writerow([key, value])
+
+    print(f"Feature metrics saved to {metrics_filename}")
+
+
 if __name__ == "__main__":
+
+    setup_logging()
+
     # Load the feature sets and baseline data
     baseline_data, data_set_2, data_set_3, dataset_name = load_new_feature_set()
 
@@ -769,14 +1051,16 @@ if __name__ == "__main__":
     # Initialize the DriftManager, which handles both drift detection and rule updating
     drift_manager = DriftManager(baseline_data, rag_validator)
 
-    # Validate the baseline dataset and generate rules
-    baseline_rules = rag_validator.validate(baseline_data, dataset_name)
-
-    # Store the generated rules using the 'store' method
-    knowledge_base.store(baseline_rules, dataset_name)
-
     # Initialize CodeSnippetGenerator with the GenerativeModel
     code_generator = CodeSnippetGenerator(model=generative_model)
+
+    # Initialize the FeatureSetValidator with Rule Generator and Code Generator
+    rule_generator = ValidationRuleGenerator(generative_model, knowledge_base)
+    validator = FeatureSetValidator(rule_generator, code_generator)
+
+    # Validate the baseline dataset and generate rules
+    metadata, stats = generate_metadata_and_stats(baseline_data)
+    validator.validate_feature_set(metadata, stats, dataset_name, baseline_data)
 
     # Validate each additional dataset, check for drift, and update rules if necessary
     for set_number, dataset in enumerate([data_set_2, data_set_3], start=2):
@@ -785,7 +1069,14 @@ if __name__ == "__main__":
         # Check for drift and update rules if necessary
         updated_rules, drifted_columns = drift_manager.check_drift_and_update_rules(dataset, f"{dataset_name}_part_{set_number}")
 
-        # If drift was detected, generate new code snippets based on the updated rules
+        # If drift was detected, generate new validation rules and validate dataset
         if updated_rules:
-            code_snippets = code_generator.generate_or_retrieve(updated_rules, f"{dataset_name}_part_{set_number}")
-            print(f"Generated code snippets for dataset part {set_number}:\n{code_snippets}")
+            print(f"Drift detected in dataset part {set_number}. Regenerating validation rules.")
+            metadata, stats = generate_metadata_and_stats(dataset)
+            validator.validate_feature_set(metadata, stats, f"{dataset_name}_part_{set_number}", dataset)
+        else:
+            print(f"No drift detected in dataset part {set_number}. Proceeding with validation.")
+            # No drift, so use the existing rules
+            metadata, stats = generate_metadata_and_stats(dataset)
+            validator.validate_feature_set(metadata, stats, f"{dataset_name}_part_{set_number}", dataset)
+
