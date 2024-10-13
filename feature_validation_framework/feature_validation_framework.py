@@ -16,6 +16,11 @@ import logging
 from datetime import datetime
 import sys
 import subprocess
+import faiss
+import numpy.typing as npt
+from typing import Optional
+#from sentence_transformers import SentenceTransformer
+import tensorflow_hub as hub
 
 class Logger(object):
     def __init__(self, log_filename):
@@ -62,14 +67,14 @@ class ValidationRuleGenerator:
         self.kb_interface = kb_interface
 
     def generate_validation_rules(self, metadata, stats, set_name):
-        existing_rules = self.kb_interface.load_rules_from_kb(set_name)
+        existing_rules = self.kb_interface.retrieve(set_name, metadata)
         if existing_rules:
             print(f"Using existing validation rules for '{set_name}'.")
             return existing_rules
         print("Generating new rules as no existing was found")
         prompt = self.generate_prompt_from_metadata(metadata, stats)
         rules = self.generative_model.generate(prompt)
-        self.kb_interface.store(set_name, rules)
+        self.kb_interface.store(set_name, rules,metadata)
         return rules
 
     def generate_prompt_from_metadata(self, metadata, stats):
@@ -423,6 +428,12 @@ class FeatureSetValidator:
 
         rules_dict = {}
         current_section = None
+        
+        # Handle both string and list types for rules
+        if isinstance(rules, list) and len(rules) > 0:
+            # Convert tuples to strings if necessary
+            rules = "\n".join(f"{rule[0]}: {rule[1]}" if isinstance(rule, tuple) else rule for rule in rules)
+
         for line in rules.splitlines():
             if line.startswith("**") and line.endswith("**"):
                 current_section = line.strip("**").strip()  
@@ -434,6 +445,8 @@ class FeatureSetValidator:
             json.dump(rules_dict, file, indent=4)  
 
         print(f"Rules saved to {rules_filename}")
+
+
 
     def define_metadata(self, df):
         """
@@ -551,21 +564,16 @@ class FeatureSetValidator:
         print(f"Feature quality issues for '{feature_name}' saved to {quality_file}.")
         print(f"Feature quality metrics for '{feature_name}' saved to {metrics_file}.")
 
-class KnowledgeBaseInterface:
-    """
-    Interface for storing validation results and rules in a SQLite database,
-    with logging for each step of the operation.
-    """
-    
+class KnowledgeBaseInterfaceDB:
     def __init__(self, db_path='knowledge_base.db'):
+        """
+        Interface for storing validation results and rules in a SQLite database,
+        with logging for each step of the operation.
+        """
         self.db_path = db_path
         self._initialize_db()
 
     def _initialize_db(self):
-        """
-        Initializes the database and creates tables if they don't exist.
-        Logs the initialization step.
-        """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -684,13 +692,18 @@ class KnowledgeBaseInterface:
             print(f"Loaded validation rules for '{set_name}'.")
         return rules
 
-class RAGValidation:
+class RAGValidationDB:
     def __init__(self, knowledge_base, generator):
         self.knowledge_base = knowledge_base
         self.generator = generator
 
     def validate(self, feature_set, set_name):
-        existing_rules = self.knowledge_base.retrieve(set_name)
+        metadata = {
+        'data_types': feature_set.dtypes.apply(lambda dtype: dtype.name).to_dict(),
+        'unique_counts': feature_set.nunique().to_dict(),
+        'num_rows': feature_set.shape[0] 
+        }
+        existing_rules = self.knowledge_base.retrieve(set_name, metadata)
         if existing_rules:
             print("Using retrieved rules for validation.")
             return existing_rules
@@ -728,7 +741,12 @@ class DriftManager:
         drifted_columns = self.drift_detector.check_drift(current_data)
         if drifted_columns:
             print(f"Drift detected in columns: {drifted_columns}")
-            updated_rules = self.rag_validator.validate(current_data, set_name)
+            metadata = {
+                'data_types': current_data.dtypes.apply(lambda dtype: dtype.name).to_dict(),
+                'unique_counts': current_data.nunique().to_dict(),
+                'num_rows': current_data.shape[0] 
+            }
+            updated_rules = self.rag_validator.validate(current_data, set_name,metadata)
             return updated_rules, drifted_columns
         else:
             print("No drift detected.")
@@ -759,33 +777,37 @@ class CodeSnippetGenerator:
 
     
     def generate_or_retrieve(self, validation_rules, feature_set_name):
-        snippets = set()  # Use a set to avoid duplicates
+        
+        snippets = set()  
 
         for rule in validation_rules:
-            if rule in self.template_store:
-                snippets.add(self.template_store[rule])
+            # Assume rule is a tuple and get the string part
+            rule_text = rule[0] if isinstance(rule, tuple) else rule  # Get the first element if it's a tuple
+
+            if rule_text in self.template_store:
+                snippets.add(self.template_store[rule_text])
             else:
                 # Generate a prompt asking the AI to create Python code based on the rules
                 prompt = f"""
-                        Based on the following data validation rules, generate valid and correct Python code that works to implement these rules for a pandas DataFrame named 'feature_set':
+                Based on the following data validation rules, generate valid and correct Python code that works to implement these rules for a pandas DataFrame named 'feature_set':
 
-                        {rule}
+                {rule_text}
 
-                        Ensure the following:
-                        1. The DataFrame 'feature_set' contains the necessary columns for the validation rules.
-                        2. Handle missing columns or missing files gracefully, **without using exit(). Instead, log the errors into the validation results list**.
-                        3. Perform the necessary checks, and store validation outcomes in a dictionary, including relevant metrics.
-                        4. Ensure that the validation metrics include:
-                        - Count of total features
-                        - Count of missing values per column
-                        - Count of outliers detected
-                        - Any other relevant statistics based on the rules
-                        5. Save the validation results to a CSV file named feature_set_validation_outcomes_{rule.replace(" ", "_").replace(",", "")}.csv.
-                        6. **Ensure all code is within a function (e.g., 'validate_feature_set')**, and there should be no 'return' statements outside functions.
-                        7. The necessary libraries (e.g., pandas, os) must be imported in the code. If 'os' or 'pandas' is not defined, import them.
-                        8. If an error occurs during execution, log the error in the validation results list, and continue execution.
-                        9. **Create a main function to call the validation function and print the outcomes.**
-                        """
+                Ensure the following:
+                1. The DataFrame 'feature_set' contains the necessary columns for the validation rules.
+                2. Handle missing columns or missing files gracefully, **without using exit(). Instead, log the errors into the validation results list**.
+                3. Perform the necessary checks, and store validation outcomes in a dictionary, including relevant metrics.
+                4. Ensure that the validation metrics include:
+                - Count of total features
+                - Count of missing values per column
+                - Count of outliers detected
+                - Any other relevant statistics based on the rules
+                5. Save the validation results to a CSV file named feature_set_validation_outcomes_{rule_text.replace(" ", "_").replace(",", "")}.csv.
+                6. **Ensure all code is within a function (e.g., 'validate_feature_set')**, and there should be no 'return' statements outside functions.
+                7. The necessary libraries (e.g., pandas, os) must be imported in the code. If 'os' or 'pandas' is not defined, import them.
+                8. If an error occurs during execution, log the error in the validation results list, and continue execution.
+                9. **Create a main function to call the validation function and print the outcomes.**
+                """
 
                 new_snippet = self.model.generate(prompt)
 
@@ -812,7 +834,7 @@ class CodeSnippetGenerator:
                         return validation_results
                     """
                 snippets.add(new_snippet)
-                self.template_store[rule] = new_snippet  
+                self.template_store[rule_text] = new_snippet  
 
         # Save validation results from each snippet to CSV files
         for i, snippet in enumerate(snippets):
@@ -822,7 +844,7 @@ class CodeSnippetGenerator:
             }
 
             # Generate a unique filename for each snippet based on its rule
-            output_filename = f'results/feature_set_validation_outcomes_{i+1}.csv'
+            output_filename = f'results/feature_set_validation_outcomes_{i + 1}.csv'
 
             # Add the output filename to local_vars for use in the snippet
             local_vars['output_filename'] = output_filename
@@ -839,12 +861,12 @@ class CodeSnippetGenerator:
 
             try:
                 exec(full_snippet, {}, local_vars)
-                print(f"Executed code snippet part {i+1} successfully. Results saved to {output_filename}.")
+                print(f"Executed code snippet part {i + 1} successfully. Results saved to {output_filename}.")
             except Exception as e:
                 # Log error in a dedicated file
                 with open(output_filename, 'a') as f:
                     f.write(f"Execution Error: {str(e)}\n")
-                print(f"Error executing snippet part {i+1}: {e}")
+                print(f"Error executing snippet part {i + 1}: {e}")
 
         # Combine all individual CSV files into one final CSV
         combined_quality_file = 'feature_set_validation_outcomes_combined.csv'
@@ -865,6 +887,7 @@ class CodeSnippetGenerator:
             print("No results to combine.")
 
         return list(snippets)
+
 
 class GenerativeModel:
     """
@@ -928,49 +951,6 @@ def load_new_feature_set():
     baseline_df, set_2, set_3 = np.split(df.sample(frac=1, random_state=42), [int(.33*len(df)), int(.66*len(df))])
     return baseline_df, set_2, set_3, dataset_name
 
-''''
-
-if __name__ == "__main__":
-    # Load sample data and split it into three sets
-    baseline_data, data_set_2, data_set_3, dataset_name = load_new_feature_set()
-
-    # Choose the AI model
-    model_choice = "gemini"  # Can be "gemini" or "mistral/llama"
-
-    # Instantiate the knowledge base and validator
-    knowledge_base = KnowledgeBaseInterface(kb_directory="knowledge_base")
-    validator = FeatureSetValidator(kb_interface=knowledge_base)
-
-    # Configure the rule generator with the chosen AI model
-    validator.rule_generator = ValidationRuleGenerator(
-        api_key=os.getenv('GOOGLE_API_KEY'),
-        kb_interface=knowledge_base,
-        model_choice=model_choice
-    )
-
-    # Initialize drift detector with the baseline dataset
-    drift_detector = DriftDetector(historical_data=baseline_data)
-
-    # Validate and check for drift in subsequent datasets
-    for set_number, dataset in enumerate([data_set_2, data_set_3], start=2):
-        print(f"Validating dataset part {set_number}...")
-        # Check for drift
-        drifted_columns = drift_detector.check_drift(dataset)
-        if drifted_columns:
-            print(f"Drift detected in dataset part {set_number} in columns: {drifted_columns}")
-            # If drift is detected, possibly re-generate validation rules
-            validator.validate_feature_set(f"{dataset_name}_part_{set_number}", dataset, baseline_data=baseline_data, save=1)
-        else:
-            # No drift detected, proceed with normal validation
-            validator.validate_feature_set(f"{dataset_name}_part_{set_number}", dataset, baseline_data=None, save=1)
-
-    # Optionally save the rules and results
-    validation_rules = "Generated validation rules based on latest data."
-    validation_results = "Validation results after checking for data drift."
-    knowledge_base.save_rules_to_kb(dataset_name, validation_rules)
-    knowledge_base.save_validation_results(dataset_name, validation_results, save=1)
-'''
-
 def generate_metadata_and_stats(df):
     metadata = {
         'data_types': df.dtypes.apply(lambda dtype: dtype.name).to_dict(),
@@ -1032,8 +1012,194 @@ def save_feature_metrics(set_name, feature_set):
     print(f"Feature metrics saved to {metrics_filename}")
 
 
-if __name__ == "__main__":
 
+
+class VectorDatabase:
+    def __init__(self, dimension: int):
+        self.dimension = dimension
+        self.index = faiss.IndexFlatL2(dimension)  # Using L2 distance for vector similarity
+        self.data = []  # To keep track of the original data (rules or code)
+
+    def add(self, vector: npt.ArrayLike, text: str):
+        """
+        Adds a vector and associated text (rules or code) to the database.
+        """
+        vector = np.array(vector, dtype=np.float32)  # Ensure the vector is in the correct format
+        self.index.add(np.array([vector]))  # Add the vector to the FAISS index
+        self.data.append(text)  # Store the associated text
+
+    def search(self, query_vector: npt.ArrayLike, k: int = 5) -> list:
+        """
+        Searches for the nearest vectors to the query vector.
+        Returns the associated texts (rules or code) of the nearest neighbors.
+        """
+        query_vector = np.array(query_vector, dtype=np.float32)  # Ensure the query vector is in the correct format
+        distances, indices = self.index.search(np.array([query_vector]), k)  # Search the index
+
+        # Initialize results list
+        results = []
+
+        # Check if any indices were returned
+        if indices.size > 0:
+            for j, i in enumerate(indices[0]):
+                if 0 <= i < len(self.data):  # Check if index is valid
+                    results.append((self.data[i], distances[0][j]))
+                else:
+                    print(f"Index {i} is out of range for data list.")
+        else:
+            print("No indices found for the query vector.")
+
+        return results if results else None  # Return None if no valid results found
+
+
+
+class KnowledgeBaseInterface:
+    def __init__(self, dimension: int, model_url: str = "https://tfhub.dev/google/universal-sentence-encoder/4"):
+        self.vector_db = VectorDatabase(dimension)
+        self.model = hub.load(model_url)  # Load the Universal Sentence Encoder model
+
+    def store(self, rules: str, set_name: str, metadata: dict):
+        """
+        Stores generated validation rules to the vector database.
+        """
+        # Generate a vector for the rules (example using a placeholder function)
+        rule_vector = self._generate_vector(rules)
+        self.vector_db.add(rule_vector, f"{set_name}|{metadata}")
+        print(f"Validation rules for '{set_name}' stored in the vector database.")
+
+    def store_code(self, code: str, set_name: str, metadata: dict):
+        """
+        Stores generated validation code to the vector database with metadata.
+        """
+        code_vector = self._generate_vector(code)
+        self.vector_db.add(code_vector, f"{set_name}|{metadata}")  # Combine set name and metadata for unique identification
+        print(f"Validation code for '{set_name}' stored in the vector database.")
+
+    def retrieve_code(self, set_name: str, metadata: dict):
+        """
+        Retrieves validation code for the given set name and metadata.
+        Logs the retrieval operation.
+        """
+        # Construct a query based on the set name and relevant metadata
+        query_vector = self._generate_vector(f"{set_name}|{metadata}")
+        return self.vector_db.search(query_vector)
+
+
+    def retrieve(self, set_name: str, metadata: dict):
+        """
+        Retrieves validation rules for the given set name and metadata.
+        Logs the retrieval operation.
+        """
+        query_vector = self._generate_vector(f"{set_name}|{metadata}")
+        return self.vector_db.search(query_vector)
+
+    def _generate_vector(self, text: str) -> npt.ArrayLike:
+        """
+        Generates a vector representation of the input text using a transformer model.
+        """
+        # Generate the embedding for the input text
+        embeddings = self.model([text])  # The model expects a list of strings
+        vector = embeddings.numpy()[0]  # Convert to numpy array and get the first (and only) vector
+        return vector
+    
+
+
+class RAGValidation:
+    def __init__(self, knowledge_base):
+        self.knowledge_base = knowledge_base
+
+    def validate(self, feature_set, set_name, metadata):
+        # Check for existing validation rules using both set_name and metadata
+        existing_rules = self.knowledge_base.retrieve(set_name, metadata)
+        existing_code = self.knowledge_base.retrieve_code(set_name, metadata)
+
+        if existing_rules:
+            print("Using retrieved rules for validation.")
+            # Generate code based on the existing rules or retrieved code
+            validation_code = self._generate_validation_code(existing_rules,set_name, existing_code)
+            return existing_rules, validation_code
+        else:
+            print("Generating new rules.")
+            prompt = self.generate_prompt_from_metadata(feature_set, set_name)
+            generated_rules = self.generator.generate(prompt)
+            print("---------------generated_rules----------------")
+            print(generated_rules)
+            self.knowledge_base.store(generated_rules, set_name, metadata)
+
+            # Generate and store validation code
+            validation_code = self._generate_validation_code(generated_rules, set_name)
+            self.knowledge_base.store_code(validation_code, set_name, metadata)
+
+            return generated_rules, validation_code
+
+    def _generate_validation_code(self, rules: str, set_name: str, existing_code: list) -> str:
+        """
+        Generates validation code based on the given rules and previously stored knowledge.
+        
+        This function retrieves similar existing validation code from the knowledge base 
+        and adapts it to generate new code tailored for the current dataset.
+        """
+        new_code = """
+        def validate_feature_set(feature_set):
+            validation_results = []
+            metrics = {
+                'total_features': len(feature_set.columns),
+                'missing_values': {},
+                'outliers': {}
+            }
+        """
+
+        # If there's existing code, use it as a base
+        if existing_code:
+            # Check if existing_code is a list
+            if isinstance(existing_code, list):
+                # Convert tuples to formatted strings
+                existing_code_str = "\n".join(f"{code[0]}  # {code[1]}" if isinstance(code, tuple) else code for code in existing_code)
+                new_code += f"\n    # Utilizing previous code for validation logic\n    {existing_code_str.strip()}\n"
+            else:
+                # In case it's a single string, just strip it
+                new_code += f"\n    # Utilizing previous code for validation logic\n    {existing_code.strip()}\n"
+        else:
+            new_code += """
+            # Default validation logic
+            # Check for missing values
+            for column in feature_set.columns:
+                missing_count = feature_set[column].isnull().sum()
+                if missing_count > 0:
+                    metrics['missing_values'][column] = missing_count
+                    validation_results.append(f"Column '{{column}}' has '{{missing_count}}' missing values.")
+
+            # Example logic for outlier detection
+            for column in feature_set.select_dtypes(include=['float64', 'int64']).columns:
+                mean_value = feature_set[column].mean()
+                std_dev = feature_set[column].std()
+                if std_dev > 0:
+                    z_scores = (feature_set[column] - mean_value) / std_dev
+                    outliers = feature_set[abs(z_scores) > 3]
+                    metrics['outliers'][column] = len(outliers)
+                    if not outliers.empty:
+                        validation_results.append(f"Column '{{column}}' contains '{{len(outliers)}}' outliers based on z-score (> 3).")
+            """
+
+        # Finalize the code structure
+        new_code += """
+            # Log validation results and metrics
+            validation_results.append(f"Validation Metrics: {metrics}")
+            return validation_results
+        """
+
+        return new_code
+
+    
+    def generate_prompt_from_metadata(self, feature_set, set_name):
+        # Generate the prompt based on the feature set and set name
+        prompt = f"Generate a set of comprehensive validation rules for the feature set '{set_name}'.\n"
+        prompt += "Here are the dataset statistics:\n"
+        for column in feature_set.columns:
+            prompt += f"- Column '{column}' with dtype '{feature_set[column].dtype}' and sample values: {feature_set[column].unique()[:5]}\n"
+        return prompt
+
+def main():
     setup_logging()
 
     # Load the feature sets and baseline data
@@ -1045,8 +1211,11 @@ if __name__ == "__main__":
     generative_model = GenerativeModel(api_key, model_choice)
 
     # Initialize the RAG validation, CodeSnippetGenerator, and Knowledge Base
-    knowledge_base = KnowledgeBaseInterface(db_path='knowledge_base.db')
-    rag_validator = RAGValidation(knowledge_base, generative_model)
+    #knowledge_base = KnowledgeBaseInterfaceDB(db_path='knowledge_base.db')
+    #rag_validator = RAGValidationDB(knowledge_base, generative_model)
+
+    knowledge_base = KnowledgeBaseInterface(dimension=512) 
+    rag_validator = RAGValidation(knowledge_base)
 
     # Initialize the DriftManager, which handles both drift detection and rule updating
     drift_manager = DriftManager(baseline_data, rag_validator)
@@ -1079,4 +1248,8 @@ if __name__ == "__main__":
             # No drift, so use the existing rules
             metadata, stats = generate_metadata_and_stats(dataset)
             validator.validate_feature_set(metadata, stats, f"{dataset_name}_part_{set_number}", dataset)
+if __name__ == "__main__":
+    main()
+
+    
 

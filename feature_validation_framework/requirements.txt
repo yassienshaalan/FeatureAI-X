@@ -1,0 +1,7 @@
+google-generativeai
+pandas
+mlflow
+scipy
+numpy
+faiss-cpu  # Use faiss-gpu if you have GPU support and want that version
+tensorflow-hub

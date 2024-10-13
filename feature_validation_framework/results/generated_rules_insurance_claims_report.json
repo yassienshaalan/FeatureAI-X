@@ -1,0 +1,59 @@
+{
+    "Completeness Rules:": [
+        "",
+        "- All fields must be populated.",
+        "- No missing values are allowed.",
+        ""
+    ],
+    "Consistency Rules:": [
+        "",
+        "- 'policy_number' must be unique for each policy.",
+        "- 'incident_location' must be unique for each incident.",
+        "- 'auto_make' and 'auto_model' must be consistent with each other.",
+        "- 'auto_year' must be consistent with the make and model of the vehicle.",
+        ""
+    ],
+    "Uniqueness Rules:": [
+        "",
+        "- 'policy_number' must be unique for each policy.",
+        "- 'incident_location' must be unique for each incident.",
+        ""
+    ],
+    "Range Checks:": [
+        "",
+        "- 'months_as_customer' must be between 1 and 479.",
+        "- 'age' must be between 18 and 64.",
+        "- 'policy_number' must be between 104594 and 999435.",
+        "- 'policy_deductable' must be between 500 and 2000.",
+        "- 'policy_annual_premium' must be between 625 and 1935.",
+        "- 'umbrella_limit' must be between -1000000 and 10000000.",
+        "- 'insured_zip' must be between 430567 and 620962.",
+        "- 'capital-gains' must be between 0 and 100500.",
+        "- 'capital-loss' must be between -93600 and 0.",
+        "- 'incident_hour_of_the_day' must be between 0 and 23.",
+        "- 'number_of_vehicles_involved' must be between 1 and 4.",
+        "- 'bodily_injuries' must be between 0 and 2.",
+        "- 'witnesses' must be between 0 and 3.",
+        "- 'total_claim_amount' must be between 2250 and 104610.",
+        "- 'injury_claim' must be between 0 and 21330.",
+        "- 'property_claim' must be between 0 and 21240.",
+        "- 'vehicle_claim' must be between 1680 and 76000.",
+        "- 'auto_year' must be between 1995 and 2015.",
+        ""
+    ],
+    "Outlier Checks:": [
+        "",
+        "- 'umbrella_limit' cannot be negative.",
+        "- 'capital-loss' cannot be negative.",
+        ""
+    ],
+    "Category Checks:": [
+        "",
+        "- 'policy_bind_date', 'policy_state', 'policy_csl', 'insured_sex', 'insured_education_level', 'insured_occupation', 'insured_hobbies', 'insured_relationship', 'incident_date', 'incident_type', 'collision_type', 'incident_severity', 'authorities_contacted', 'incident_state', 'incident_city', 'property_damage', 'police_report_available', 'auto_make', 'auto_model', and 'fraud_reported' must only contain valid categories based on historical data.",
+        ""
+    ],
+    "Readability and Keyword Presence Checks:": [
+        "",
+        "- 'policy_bind_date', 'policy_state', 'policy_csl', 'insured_sex', 'insured_education_level', 'insured_occupation', 'insured_hobbies', 'insured_relationship', 'incident_date', 'incident_type', 'collision_type', 'incident_severity', 'authorities_contacted', 'incident_state', 'incident_city', 'incident_location', 'property_damage', 'police_report_available', 'auto_make', 'auto_model', and 'fraud_reported' must be checked for completeness, readability, and keyword presence."
+    ]
+}
